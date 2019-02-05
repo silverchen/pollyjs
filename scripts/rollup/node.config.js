@@ -4,6 +4,7 @@ import babel from 'rollup-plugin-babel';
 import { terser } from 'rollup-plugin-terser';
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
+import multiEntry from 'rollup-plugin-multi-entry';
 
 import { input, output, pkg, minify } from './utils';
 
@@ -45,6 +46,7 @@ export default function createNodeConfig(options = {}) {
             '@babel/proposal-class-properties'
           ]
         }),
+        multiEntry(),
         minify && terser()
       ]
     },

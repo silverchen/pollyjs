@@ -52,6 +52,9 @@
   "devDependencies": {
     "@pollyjs/adapter": "^2.1.0",
     "@pollyjs/persister": "^2.1.0",
+    "@types/blueimp-md5": "^2.7.0",
+    "@types/is-absolute-url": "^2.1.0",
+    "@types/lodash-es": "^4.17.1",
     "rollup": "^0.67.0"
   }
 }

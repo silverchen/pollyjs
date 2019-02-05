@@ -8,6 +8,7 @@ import { rollup as lerna } from 'lerna-alias';
 import resolve from 'rollup-plugin-node-resolve';
 import globals from 'rollup-plugin-node-globals';
 import builtins from 'rollup-plugin-node-builtins';
+import multiEntry from 'rollup-plugin-multi-entry';
 
 import { input, output, pkg, minify } from './utils';
 
@@ -49,6 +50,7 @@ export default function createBrowserConfig(options = {}, targets) {
         }),
         globals(),
         builtins(),
+        multiEntry(),
         minify && terser()
       ],
       onwarn(message) {
