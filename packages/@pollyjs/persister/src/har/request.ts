@@ -1,8 +1,10 @@
-import toNVPairs, { NVPairs } from './utils/to-nv-pairs';
 import getByteLength from 'utf8-byte-length';
 import setCookies from 'set-cookie-parser';
 
-function headersSize(request: Request) {
+import toNVPairs from './utils/to-nv-pairs';
+import getFirstHeader from './utils/get-first-header';
+
+function headersSize(request: PollyRequest) {
   const keys: string[] = [];
   const values: string[] = [];
 
@@ -22,17 +24,18 @@ function headersSize(request: Request) {
 }
 
 export default class Request {
-  public httpVersion: string;
-  public url: string;
-  public method: string;
-  public headers: NVPairs;
-  public headersSize: number;
-  public queryString: NVPairs;
-  public cookies: setCookies.Cookie[];
-  public bodySize: number;
-  public postData?: {
+  httpVersion: string;
+  url: string;
+  method: string;
+  headers: NVPairs;
+  headersSize: number;
+  queryString: NVPairs;
+  cookies: setCookies.Cookie[];
+  bodySize: number;
+  postData?: {
     mimeType: string
-    text?: string
+    params: Object[],
+    text?: string,
   }
 
   constructor(request: PollyRequest) {
@@ -44,18 +47,21 @@ export default class Request {
     this.queryString = toNVPairs(request.query);
     this.cookies = setCookies.parse(request.getHeader('Set-Cookie'));
 
-    if (request.body || request.hasHeader('Content-Type')) {
+    if (request.body) {
       this.postData = {
-        mimeType: request.getHeader('Content-Type') || 'text/plain'
+        mimeType: getFirstHeader(request, 'Content-Type') || 'text/plain',
+        params: []
       };
 
-      if (request.body && typeof request.body === 'string') {
+      if (typeof request.body === 'string') {
         this.postData.text = request.body;
       }
     }
 
-    if (request.hasHeader('Content-Length')) {
-      this.bodySize = parseInt(request.getHeader('Content-Length'), 10);
+    const contentLength = getFirstHeader(request, 'Content-Length');
+
+    if (contentLength) {
+      this.bodySize = parseInt(contentLength, 10);
     } else {
       this.bodySize =
         this.postData && this.postData.text

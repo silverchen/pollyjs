@@ -13,16 +13,16 @@ const browser =
     : null;
 
 export default class Log {
-  public version: string;
-  public entries: Entry[];
-  public pages: [];
-  public browser?: Browser
-  public creator?: {
+  version: string;
+  entries: Entry[];
+  pages: [];
+  browser?: Browser
+  creator?: {
     name: string
     version: string
     comment: string
   }
-  public _recordingName?: string;
+  _recordingName?: string;
 
   constructor(opts = {}) {
     this.version = '1.2';
@@ -37,7 +37,7 @@ export default class Log {
     }
   }
 
-  public addEntries(entries: Entry[] = []) {
+  addEntries(entries: Entry[] = []) {
     this.entries = uniqWith(
       // Add the new entries to the front so they take priority
       [...entries, ...this.entries],
@@ -47,7 +47,7 @@ export default class Log {
     this.sortEntries();
   }
 
-  public sortEntries() {
+  sortEntries() {
     this.entries = this.entries.sort(
       (a, b) => new Date(a.startedDateTime).getTime() - new Date(b.startedDateTime).getTime()
     );

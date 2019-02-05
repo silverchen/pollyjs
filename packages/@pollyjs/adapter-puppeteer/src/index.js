@@ -51,7 +51,7 @@ export default class PuppeteerAdapter extends Adapter {
     const { requestResourceTypes } = this.options;
 
     this[LISTENERS].set(page, {
-      request: request => {
+      request: async request => {
         if (requestResourceTypes.includes(request.resourceType())) {
           const url = request.url();
           const method = request.method();
@@ -70,13 +70,15 @@ export default class PuppeteerAdapter extends Adapter {
 
             // If this is a polly passthrough request
             // Get the associated promise object for the request id and set it
-            // on the request
-            this._requestsMapping.passthroughs.set(
-              request,
-              this[PASSTHROUGH_PROMISES].get(
-                parsedUrl.query[PASSTHROUGH_REQ_ID_QP]
-              )
-            );
+            // on the request.
+            if (!isPreFlightReq) {
+              this._requestsMapping.passthroughs.set(
+                request,
+                this[PASSTHROUGH_PROMISES].get(
+                  parsedUrl.query[PASSTHROUGH_REQ_ID_QP]
+                )
+              );
+            }
 
             // Delete the query param to remove any pollyjs footprint
             delete parsedUrl.query[PASSTHROUGH_REQ_ID_QP];
@@ -87,12 +89,20 @@ export default class PuppeteerAdapter extends Adapter {
             // Do not intercept preflight requests
             request.continue();
           } else {
-            this.handleRequest({
+            const pollyRequest = await this.handleRequest({
               headers,
               url,
               method,
               body: request.postData(),
               requestArguments: [request]
+            });
+
+            const { response } = pollyRequest;
+
+            request.respond({
+              status: response.statusCode,
+              headers: response.headers,
+              body: response.body
             });
           }
         } else {
@@ -168,34 +178,6 @@ export default class PuppeteerAdapter extends Adapter {
     await request.abort();
   }
 
-  async onRecord(pollyRequest) {
-    await this.passthroughRequest(pollyRequest);
-    await this.persister.recordRequest(pollyRequest);
-    this.respondToPuppeteerRequest(pollyRequest);
-  }
-
-  async onReplay(pollyRequest, { statusCode, headers, body }) {
-    await pollyRequest.respond(statusCode, headers, body);
-    this.respondToPuppeteerRequest(pollyRequest);
-  }
-
-  async onPassthrough(pollyRequest) {
-    await this.passthroughRequest(pollyRequest);
-    this.respondToPuppeteerRequest(pollyRequest);
-  }
-
-  async onIntercept(pollyRequest, { statusCode, headers, body }) {
-    await pollyRequest.respond(statusCode, headers, body);
-    this.respondToPuppeteerRequest(pollyRequest);
-  }
-
-  respondToPuppeteerRequest(pollyRequest) {
-    const [request] = pollyRequest.requestArguments;
-    const { statusCode: status, headers, body } = pollyRequest.response;
-
-    request.respond({ status, headers, body });
-  }
-
   async passthroughRequest(pollyRequest) {
     const { page } = this.options;
     const { id, order, url, method, headers, body } = pollyRequest;
@@ -225,12 +207,13 @@ export default class PuppeteerAdapter extends Adapter {
         );
       });
 
-      return pollyRequest.respond(
-        response.status(),
-        response.headers(),
-        await response.text()
-      );
+      return {
+        statusCode: response.status(),
+        headers: response.headers(),
+        body: await response.text()
+      };
     } catch (error) {
+      console.error(error);
       throw error;
     } finally {
       this[PASSTHROUGH_PROMISES].delete(requestId);

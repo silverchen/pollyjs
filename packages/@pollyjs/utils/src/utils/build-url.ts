@@ -1,4 +1,4 @@
-import URL from 'url-parse';
+import URL from './url';
 
 export default function buildUrl(...paths: string[]) {
   const url = new URL(

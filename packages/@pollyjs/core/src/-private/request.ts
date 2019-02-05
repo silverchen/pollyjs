@@ -1,56 +1,72 @@
 import md5 from 'blueimp-md5';
 import stringify from 'fast-json-stable-stringify';
-import PollyResponse from './response';
-import NormalizeRequest from '../utils/normalize-request';
-import parseUrl from '../utils/parse-url';
-import serializeRequestBody from '../utils/serialize-request-body';
-import DeferredPromise from '../utils/deferred-promise';
 import isAbsoluteUrl from 'is-absolute-url';
 import { URL, assert, timestamp } from '@pollyjs/utils';
+
+import NormalizeRequest from '../utils/normalize-request';
+import parseUrl from '../utils/parse-url';
+import guidForRecording from '../utils/guid-for-recording';
+import mergeConfigs from '../utils/merge-configs';
+import defer from '../utils/deferred-promise';
+import {
+  validateRecordingName,
+  validateRequestConfig
+} from '../utils/validators';
+
 import HTTPBase from './http-base';
+import PollyResponse from './response';
+import EventEmitter from './event-emitter';
 
 const { keys, freeze } = Object;
 
-const PARSED_URL = Symbol();
 const ROUTE = Symbol();
 const POLLY = Symbol();
+const PARSED_URL = Symbol();
+const EVENT_EMITTER = Symbol();
+
+const SUPPORTED_EVENTS = ['identify'];
 
 export default class PollyRequest extends HTTPBase {
-  public method: string;
-  public body?: string;
-  public serializedBody: string;
-  public recordingName: string;
-  public recordingId: string;
-  public requestArguments: any[];
-  public promise: Promise<void>;
-  public action?: string;
-  public timestamp: string;
-  public response: PollyResponse;
-  public didRespond: boolean;
-  public responseTime: number;
-  public id: string;
-  public order: number;
+  method: string;
+  body?: string;
+  recordingName: string;
+  recordingId: string;
+  requestArguments: any[];
+  promise: Promise<void>;
+  action: string | null;
+  timestamp?: string;
+  response?: PollyResponse;
+  didRespond: boolean;
+  responseTime?: number;
+  id?: string;
+  order?: number;
+  identifiers?: {};
 
   private [POLLY]: Polly;
   private [ROUTE]: Route;
   private [PARSED_URL]: URL;
-  private identifiers: {};
+  private [EVENT_EMITTER]: EventEmitter;
 
   constructor(polly, request) {
     super();
 
-    assert('Url is required.', typeof request.url === 'string');
-    assert('Method is required.', typeof request.method === 'string');
+    assert('Url is required.', request.url);
+    assert(
+      'Method is required.',
+      request.method && typeof request.method === 'string'
+    );
 
+    this.didRespond = false;
     this.url = request.url;
     this.method = request.method.toUpperCase();
     this.body = request.body;
     this.setHeaders(request.headers);
     this.recordingName = polly.recordingName;
     this.recordingId = polly.recordingId;
-    this.requestArguments = freeze(request.requestArguments || []);
-    this.promise = new DeferredPromise();
+    this.requestArguments = freeze(request.requestArguments);
+    this.promise = defer();
     this[POLLY] = polly;
+    this[EVENT_EMITTER] = new EventEmitter({ eventNames: SUPPORTED_EVENTS });
 
     /*
       The action taken with this request (e.g. record, replay, intercept, or passthrough)
@@ -60,70 +76,99 @@ export default class PollyRequest extends HTTPBase {
 
     // Lookup the associated route for this request
     this[ROUTE] = polly.server.lookup(this.method, this.url);
+
+    // Handle config overrides defined by the route
+    this._configure(this[ROUTE].config());
+
+    // Handle recording name override defined by the route
+    const recordingName = this[ROUTE].recordingName();
+
+    if (recordingName) {
+      this._overrideRecordingName(recordingName);
+    }
   }
 
-  public get url(): string {
+  get url(): string {
     // Use .toString() to force a rebuild of the url. This guarantees that
     // Any changes to the query object get propagated.
     return this[PARSED_URL].toString();
   }
 
-  public set url(value: string) {
-    this[PARSED_URL] = parseUrl(value, true);
+  set url(value) {
+    // Make sure to coerce the value into a string as the passed value could be
+    // a WHATWG's URL object.
+    this[PARSED_URL] = parseUrl(`${value}`, true);
   }
 
-  public get absoluteUrl(): string {
+  get absoluteUrl(): string {
     const { url } = this;
 
     return isAbsoluteUrl(url) ? url : new URL(url).href;
   }
 
-  public get protocol(): string {
+  get protocol(): string {
     return this[PARSED_URL].protocol;
   }
 
-  public get hostname(): string {
+  get hostname(): string {
     return this[PARSED_URL].hostname;
   }
 
-  public get port(): string {
+  get port(): string {
     return this[PARSED_URL].port;
   }
 
-  public get origin(): string {
+  get origin(): string {
     return this[PARSED_URL].origin;
   }
 
-  public get pathname(): string {
+  get pathname(): string {
     return this[PARSED_URL].pathname;
   }
 
-  public get query(): {} {
+  get query(): {} {
     return this[PARSED_URL].query;
   }
 
-  public set query(value: {}) {
+  set query(value: {}) {
     this[PARSED_URL].set('query', value);
   }
 
-  public get hash(): string {
+  get hash(): string {
     return this[PARSED_URL].hash;
   }
 
-  public set hash(value: string) {
+  set hash(value: string) {
     this[PARSED_URL].set('hash', value);
   }
 
-  public get shouldPassthrough(): boolean {
-    return this[ROUTE].handler.get('passthrough') === true;
+  get shouldPassthrough() {
+    return this[ROUTE].shouldPassthrough();
   }
 
-  public get shouldIntercept(): boolean {
-    return typeof this[ROUTE].handler.get('intercept') === 'function';
+  get shouldIntercept() {
+    return this[ROUTE].shouldIntercept();
   }
 
+  on(eventName, listener) {
+    this[EVENT_EMITTER].on(eventName, listener);
 
-  public async setup(): Promise<void> {
+    return this;
+  }
+
+  once(eventName, listener) {
+    this[EVENT_EMITTER].once(eventName, listener);
+
+    return this;
+  }
+
+  off(eventName, listener) {
+    this[EVENT_EMITTER].off(eventName, listener);
+
+    return this;
+  }
+
+  async setup(): Promise<void> {
     // Trigger the `request` event
     await this._emit('request');
 
@@ -131,17 +176,16 @@ export default class PollyRequest extends HTTPBase {
     this.response = new PollyResponse();
     this.didRespond = false;
 
-    // Serialize the body which handles FormData + Blobs/Files
-    this.serializedBody = await this.serializeBody();
-
     // Setup this request's identifiers, id, and order
-    this._identify();
+    await this._identify();
 
     // Timestamp the request
     this.timestamp = timestamp();
   }
 
-  public async respond(status?: number, headers?: {}, body?: string): Promise<void> {
+  async respond(response) {
+    const { statusCode, headers, body } = response || {};
+
     assert(
       'Cannot respond to a request that already has a response.',
       !this.didRespond
@@ -150,8 +194,11 @@ export default class PollyRequest extends HTTPBase {
     // Timestamp the response
     this.response.timestamp = timestamp();
 
-    // Set the status code and headers
-    this.response.status(status).setHeaders(headers);
+    // Set the status code
+    this.response.status(statusCode);
+
+    // Se the headers
+    this.response.setHeaders(headers);
 
     // Set the body without modifying any headers (instead of using .send())
     this.response.body = body;
@@ -174,39 +221,50 @@ export default class PollyRequest extends HTTPBase {
     await this._emit('response', this.response);
   }
 
-  public async serializeBody(): Promise<string> {
-    return serializeRequestBody(this.body);
+  _overrideRecordingName(recordingName) {
+    validateRecordingName(recordingName);
+    this.recordingName = recordingName;
+    this.recordingId = guidForRecording(recordingName);
   }
 
-  public async _intercept(): Promise<void> {
+  _configure(config) {
+    validateRequestConfig(config);
+    this.config = mergeConfigs(this[POLLY].config, this.config || {}, config);
+  }
+
+  async _intercept(): Promise<void> {
     await this[ROUTE].intercept(this, this.response, ...arguments);
   }
 
-  public async _emit(eventName: string, ...args: any[]): Promise<void> {
+  async _emit(eventName: string, ...args: any[]): Promise<void> {
     await this[ROUTE].emit(eventName, this, ...args);
   }
 
-  private _identify(): void {
+  async _identify() {
     const polly = this[POLLY];
-    const { _requests: requests, config } = polly;
-    const { matchRequestsBy } = config;
-    const identifiers = {};
+    const { _requests: requests } = polly;
+    const { matchRequestsBy } = this.config;
+
+    this.identifiers = {};
 
     // Iterate through each normalizer
     keys(NormalizeRequest).forEach(key => {
       if (this[key] && matchRequestsBy[key]) {
-        identifiers[key] = NormalizeRequest[key](
-          key === 'body' ? this.serializedBody : this[key],
+        this.identifiers[key] = NormalizeRequest[key](
+          this[key],
           matchRequestsBy[key]
         );
       }
     });
 
-    // Store the identifiers for debugging and testing
-    this.identifiers = freeze(identifiers);
+    // Emit the `identify` event which adapters can use to serialize the request body
+    await this[EVENT_EMITTER].emit('identify', this);
+
+    // Freeze the identifiers so they can no longer be modified
+    freeze(this.identifiers);
 
     // Guid is a string representation of the identifiers
-    this.id = md5(stringify(identifiers));
+    this.id = md5(stringify(this.identifiers));
 
     // Order is calculated on other requests with the same id
     // Only requests before this current one are taken into account.

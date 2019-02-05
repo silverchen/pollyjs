@@ -1,10 +1,11 @@
+import Adapter from '@pollyjs/adapter';
+import Persister from '@pollyjs/persister';
+import { MODES } from '@pollyjs/utils';
+
 import defaults from '../../src/defaults/config';
 import Polly from '../../src/polly';
 import Container from '../../src/-private/container';
 import setupPolly from '../../src/test-helpers/mocha';
-import Adapter from '@pollyjs/adapter';
-import Persister from '@pollyjs/persister';
-import { MODES } from '@pollyjs/utils';
 
 describe('Unit | Polly', function() {
   it('should exist', function() {
@@ -29,7 +30,7 @@ describe('Unit | Polly', function() {
 
       expect(() => (polly.recordingName = value)).to.throw(
         Error,
-        /not a valid recording name/
+        /Invalid recording name provided/
       );
 
       await polly.stop();

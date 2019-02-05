@@ -2,7 +2,7 @@
 
 ## HTTP Methods
 
-The `get`, `put`, `post`, `patch`, `delete`, `head`, and `options` HTTP methods
+The `GET`, `PUT`, `POST`, `PATCH`, `DELETE`, `MERGE`, `HEAD`, and `OPTIONS` HTTP methods
 have a corresponding method on the server instance.
 
 ```js
@@ -11,6 +11,7 @@ server.put('/ping');
 server.post('/ping');
 server.patch('/ping');
 server.delete('/ping');
+server.merge('/ping');
 server.head('/ping');
 server.options('/ping');
 ```
@@ -21,7 +22,9 @@ you can use to pass-through, intercept, and attach events to.
 ```js
 server.get('/ping').passthrough();
 server.put('/ping').intercept((req, res) => res.sendStatus(200));
-server.post('/ping').on('request', (req) => { /* Do Something */ });
+server.post('/ping').on('request', req => {
+  /* Do Something */
+});
 server.patch('/ping').off('request');
 ```
 
@@ -30,28 +33,24 @@ server.patch('/ping').off('request');
 Declare [Events & Middleware](server/events-and-middleware#middleware) globally
 or for a specific route.
 
-__Example__
+**Example**
 
 ```js
-server
-  .any('/session/:id')
-  .on('request', (req, res) => {
-    req.query.email = 'test@netflix.com';
-  });
+server.any('/session/:id').on('request', (req, res) => {
+  req.query.email = 'test@netflix.com';
+});
 ```
 
 ## host
 
 Define a block where all methods will inherit the provided host.
 
-__Example__
+**Example**
 
 ```js
 server.host('http://netflix.com', () => {
   // Middleware will be attached to the host
-  server
-    .any()
-    .on('request', (req) => {});
+  server.any().on('request', req => {});
 
   server.get('/session').intercept(() => {}); // → http://netflix.com/session
 });
@@ -61,20 +60,18 @@ server.host('http://netflix.com', () => {
 
 Define a block where all methods will inherit the provided namespace.
 
-__Example__
+**Example**
 
 ```js
 server.namespace('/api', () => {
   // Middleware will be attached to the namespace
-  server
-    .any()
-    .on('request', (req) => {});
+  server.any().on('request', req => {});
 
   server.get('/session').intercept(() => {}); // → /api/session
 
   server.namespace('/v2', () => {
     server.get('/session').intercept(() => {}); // → /api/v2/session
-  })
+  });
 });
 ```
 
@@ -82,7 +79,7 @@ server.namespace('/api', () => {
 
 Returns a promise that will resolve after the given number of milliseconds.
 
-__Example__
+**Example**
 
 ```js
 server.get('/ping').intercept(async (req, res) => {

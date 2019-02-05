@@ -1,15 +1,16 @@
-import mergeOptions from 'merge-options';
+import { MODES, assert } from '@pollyjs/utils';
+
+import { version } from '../package.json';
+
 import Logger from './-private/logger';
 import Container, { FactoryFn } from './-private/container';
 import DefaultConfig, { PollyConfig } from './defaults/config';
 import PollyRequest from './-private/request';
 import guidForRecording from './utils/guid-for-recording';
-import Server from './server';
-import Adapter from '@pollyjs/adapter';
-import Persister from '@pollyjs/persister';
-import { version } from '../package.json';
-import { MODES, assert } from '@pollyjs/utils';
+import mergeConfigs from './utils/merge-configs';
 import EventEmitter from './-private/event-emitter';
+import Server from './server';
+import { validateRecordingName } from './utils/validators';
 
 type ValidMode = keyof typeof MODES;
 
@@ -20,7 +21,6 @@ interface FactoryRegistrationCallback {
 const RECORDING_NAME = Symbol();
 const RECORDING_ID = Symbol();
 const PAUSED_MODE = Symbol();
-const { values } = Object;
 
 const FACTORY_REGISTRATION: WeakMap<
   FactoryFn,
@@ -45,7 +45,10 @@ export default class Polly {
   public persister: Persister | null;
   private _requests: PollyRequest[];
 
-  constructor(recordingName: string, public config: PollyConfig = {} as PollyConfig) {
+  constructor(
+    recordingName: string,
+    public config: PollyConfig = { mode: 'REPLAY' }
+  ) {
     this.recordingName = recordingName;
     this.logger = new Logger(this);
     this.server = new Server();
@@ -87,10 +90,7 @@ export default class Polly {
   }
 
   set recordingName(name) {
-    assert(
-      `'${name}' is not a valid recording name.`,
-      typeof name === 'string' && name.trim().length > 0
-    );
+    validateRecordingName(name);
 
     this[RECORDING_NAME] = name;
     this[RECORDING_ID] = guidForRecording(name);
@@ -109,9 +109,8 @@ export default class Polly {
     return this.config.mode;
   }
 
-  set mode(mode: ValidMode) {
-    const uppercaseMode = mode.toUpperCase() as ValidMode;
-    const possibleModes = values(MODES) as ValidMode[];
+  set mode(mode) {
+    const possibleModes = Object.values(MODES);
 
     assert(
       `Invalid mode provided: "${uppercaseMode}". Possible modes: ${possibleModes.join(
@@ -123,7 +122,13 @@ export default class Polly {
     this.config.mode = uppercaseMode;
   }
 
-  static once(eventName: string, listener) {
+  static on(eventName, listener) {
+    EVENT_EMITTER.on(eventName, listener);
+
+    return this;
+  }
+
+  static once(eventName, listener) {
     EVENT_EMITTER.once(eventName, listener);
 
     return this;
@@ -175,7 +180,7 @@ export default class Polly {
     // Disconnect from all current adapters before updating the config
     this.disconnect();
 
-    this.config = mergeOptions(DefaultConfig, this.config, config);
+    this.config = mergeConfigs(DefaultConfig, this.config, config);
 
     // Register and connect to all specified adapters
     this.config.adapters.forEach(adapter => this.connectTo(adapter));
@@ -196,12 +201,6 @@ export default class Polly {
 
       this.persister = new (container.lookup(`persister:${persister}`))(this);
     }
-  }
-
-  static on(eventName: string, listener: Function) {
-    EVENT_EMITTER.on(eventName, listener);
-
-    return this;
   }
 
   /**

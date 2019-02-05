@@ -9,13 +9,16 @@ export default function adapterBrowserTests() {
     form.append('string', recordingName);
     form.append('array', [recordingName, recordingName]);
     form.append('blob', new Blob([recordingName], { type: 'text/plain' }));
-    form.append('file', new File([recordingName], 'test.txt'));
+    form.append(
+      'file',
+      new File([recordingName], 'test.txt', { type: 'text/plain' })
+    );
 
     server.post('/submit').intercept((req, res) => {
-      const body = req.serializedBody;
+      const body = req.identifiers.body;
 
       // Make sure the form data exists in the identifiers
-      expect(req.identifiers.body).to.include(recordingName);
+      expect(body).to.include(recordingName);
 
       expect(body).to.include(`string=${recordingName}`);
       expect(body).to.include(
@@ -24,7 +27,10 @@ export default function adapterBrowserTests() {
       expect(body).to.include(
         `blob=data:text/plain;base64,${btoa(recordingName)}`
       );
-      expect(body).to.include(`file=data:;base64,${btoa(recordingName)}`);
+
+      expect(body).to.include(
+        `file=data:text/plain;base64,${btoa(recordingName)}`
+      );
 
       res.sendStatus(200);
     });
@@ -42,8 +48,6 @@ export default function adapterBrowserTests() {
 
       // Make sure the form data exists in the identifiers
       expect(req.identifiers.body).to.equal(dataUrl);
-
-      expect(req.serializedBody).to.equal(dataUrl);
 
       res.sendStatus(200);
     });

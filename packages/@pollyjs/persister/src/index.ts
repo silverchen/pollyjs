@@ -1,13 +1,14 @@
+import stringify from 'fast-json-stable-stringify';
+import { ACTIONS, assert } from '@pollyjs/utils';
+
 import HAR from './har';
 import Entry from './har/entry';
-import stringify from 'fast-json-stable-stringify';
-import { assert } from '@pollyjs/utils';
 
 const CREATOR_NAME = 'Polly.JS';
 
 export default class Persister {
-  public polly: Polly;
-  public pending: Map<string, { name: string, requests: PollyRequest[] }>;
+  polly: Polly;
+  pending: Map<string, { name: string, requests: PollyRequest[] }>;
   private _cache: Map<string, Promise<HAR | null>>;
 
   constructor(polly: Polly) {
@@ -16,21 +17,21 @@ export default class Persister {
     this._cache = new Map();
   }
 
-  public static get type() {
+  static get type() {
     return 'persister';
   }
 
-  public static get name() {
-    assert('Must override the static `name` getter.', false);
+  static get name() {
+    assert('Must override the static `name` getter.');
 
     return 'base';
   }
 
-  public get defaultOptions() {
+  get defaultOptions() {
     return {};
   }
 
-  public get options() {
+  get options() {
     const { name } = this.constructor;
 
     return {
@@ -39,7 +40,7 @@ export default class Persister {
     };
   }
 
-  public get hasPending() {
+  get hasPending() {
     /*
       Although the pending map is bucketed by recordingId, the bucket will always
       be created with a single item in it so we can assume that if a bucket
@@ -48,7 +49,7 @@ export default class Persister {
     return this.pending.size > 0;
   }
 
-  public async persist() {
+  async persist() {
     if (!this.hasPending) {
       return;
     }
@@ -81,7 +82,7 @@ export default class Persister {
           } because the status code was ${
             entry.response.status
           } and \`recordFailedRequests\` is \`false\``,
-          request.response.ok || this.polly.config.recordFailedRequests
+          request.response.ok || request.config.recordFailedRequests
         );
 
         /*
@@ -91,11 +92,15 @@ export default class Persister {
                 modify the payload (i.e. encrypting the request & response).
         */
         await request._emit('beforePersist', entry);
-
         entries.push(entry);
       }
 
       har.log.addEntries(entries);
+
+      if (!this.polly.config.persisterOptions.keepUnusedRequests) {
+        this._removeUnusedEntries(recordingId, har);
+      }
+
       promises.push(this.save(recordingId, har));
     }
 
@@ -103,7 +108,7 @@ export default class Persister {
     this.pending.clear();
   }
 
-  public recordRequest(pollyRequest: PollyRequest) {
+  recordRequest(pollyRequest: PollyRequest) {
     this.assert(
       `You must pass a PollyRequest to 'recordRequest'.`,
       pollyRequest
@@ -122,7 +127,7 @@ export default class Persister {
     this.pending.get(recordingId)!.requests.push(pollyRequest);
   }
 
-  public async find(recordingId: string) {
+  async find(recordingId: string) {
     const { _cache: cache } = this;
 
     if (!cache.has(recordingId)) {
@@ -149,17 +154,17 @@ export default class Persister {
     return cache.get(recordingId);
   }
 
-  public async save(recordingId: string, har: HAR) {
+  async save(recordingId: string, har: HAR) {
     await this.saveRecording(recordingId, har);
     this._cache.delete(recordingId);
   }
 
-  public async delete(recordingId: string) {
+  async delete(recordingId: string) {
     await this.deleteRecording(recordingId);
     this._cache.delete(recordingId);
   }
 
-  public async findEntry(pollyRequest: PollyRequest) {
+  async findEntry(pollyRequest: PollyRequest) {
     const { id, order, recordingId } = pollyRequest;
     const recording = await this.find(recordingId);
 
@@ -172,27 +177,46 @@ export default class Persister {
     );
   }
 
-  public stringify(data: any, options?: {}) {
+  stringify(data: any, options?: {}) {
     return stringify(data, options);
   }
 
-  public assert(message: string, condition?: boolean) {
+  assert(message: string, condition?: boolean) {
     const { type, name } = this.constructor as typeof Persister;
 
     assert(`[${type}:${name}] ${message}`, condition);
   }
 
-  public async findRecording(recordingId: string): Promise<HAR | null> {
-    this.assert('Must implement the `findRecording` hook.', false);
+  /**
+   * Remove all entries from the given HAR that do not match any requests in
+   * the current Polly instance.
+   *
+   * @param {String} recordingId
+   * @param {HAR} har
+   */
+  _removeUnusedEntries(recordingId: string, har: HAR) {
+    const requests = this.polly._requests.filter(
+      r =>
+        r.recordingId === recordingId &&
+        (r.action === ACTIONS.RECORD || r.action === ACTIONS.REPLAY)
+    );
+
+    har.log.entries = har.log.entries.filter(entry =>
+      requests.find(r => entry._id === r.id && entry._order === r.order)
+    );
+  }
+
+  async findRecording(recordingId: string): Promise<HAR | null> {
+    this.assert('Must implement the `findRecording` hook.');
 
     return null;
   }
 
-  public async saveRecording(recordingId: string, har: HAR) {
-    this.assert('Must implement the `saveRecording` hook.', false);
+  async saveRecording(recordingId: string, har: HAR) {
+    this.assert('Must implement the `saveRecording` hook.');
   }
 
-  public async deleteRecording(recordingId: string) {
-    this.assert('Must implement the `deleteRecording` hook.', false);
+  async deleteRecording(recordingId: string) {
+    this.assert('Must implement the `deleteRecording` hook.');
   }
 }

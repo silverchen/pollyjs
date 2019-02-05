@@ -6,12 +6,7 @@
 [![Build Status](https://travis-ci.org/Netflix/pollyjs.svg?branch=master)](https://travis-ci.org/Netflix/pollyjs)
 [![license](https://img.shields.io/github/license/Netflix/pollyjs.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-Polly.JS is a standalone, framework-agnostic JavaScript library that enables
-recording, replaying, and stubbing HTTP interactions.
-
-Polly taps into native browser APIs to mock requests and responses with little to no
-configuration while giving you the ability to take full control of each request with
-a simple, powerful, and intuitive API.
+Polly.JS is a standalone, framework-agnostic JavaScript library that enables recording, replaying, and stubbing of HTTP interactions. By tapping into multiple request APIs across both Node & the browser, Polly.JS is able to mock requests and responses with little to no configuration while giving you the ability to take full control of each request with a simple, powerful, and intuitive API.
 
 > Interested in contributing or just seeing Polly in action? Head over to [CONTRIBUTING.md](CONTRIBUTING.md) to learn how to spin up the project!
 
@@ -25,7 +20,7 @@ Polly alleviates this by recording and maintaining actual server responses witho
 
 ## Features
 
-- 🚀 Fetch & XHR Support
+- 🚀 Node & Browser Support
 - ⚡️️ Simple, Powerful, & Intuitive API
 - 💎 First Class Mocha & QUnit Test Helpers
 - 🔥 Intercept, Pass-Through, and Attach Events
@@ -172,9 +167,9 @@ file which Polly will use to replay the sign-in response when the test is rerun:
 
 _In alphabetical order:_
 
-* [Jason Mitchell](https://twitter.com/_jasonmit) - Creator / Maintainer
-* [Offir Golan](https://twitter.com/offirgolan) - Creator / Maintainer
-* [Sophinie Som](https://twitter.com/s0phinie) - Branding / Logo
+- [Jason Mitchell](https://twitter.com/_jasonmit) - Creator / Maintainer
+- [Offir Golan](https://twitter.com/offirgolan) - Creator / Maintainer
+- [Sophinie Som](https://twitter.com/s0phinie) - Branding / Logo
 
 ## We're hiring!
 
@@ -182,9 +177,8 @@ Join the Netflix Studio & Content Engineering teams to help us build projects li
 
 Open Roles:
 
-* [Senior UI Engineer - Content Platform Engineering](https://jobs.netflix.com/jobs/865180)
-* [Senior UI Engineer - Globalization Technologies & Infrastructure](https://jobs.netflix.com/jobs/866907)
-* [Senior UI Engineer - Partner Workforce](https://jobs.netflix.com/jobs/866939)
+- [Senior UI Engineer - Production Visibility Engineering](https://jobs.netflix.com/jobs/868295)
+- [Senior UI Engineer - Production Workflows Engineering](https://jobs.netflix.com/jobs/868224)
 
 ## License
 

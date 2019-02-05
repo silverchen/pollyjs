@@ -29,12 +29,12 @@ The response's body.
 
 Set the response's status code.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| status | `Number` | Status code |
-| __Returns__ | [Response](server/response) | The current response |
+| Param       | Type                        | Description          |
+| ----------- | --------------------------- | -------------------- |
+| status      | `Number`                    | Status code          |
+| **Returns** | [Response](server/response) | The current response |
 
-__Example__
+**Example**
 
 ```js
 res.status(200);
@@ -44,12 +44,12 @@ res.status(200);
 
 Get a header with a given name.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| name | `String` | The name of the header |
-| __Returns__ | `String` | The header value |
+| Param       | Type             | Description            |
+| ----------- | ---------------- | ---------------------- |
+| name        | `String`         | The name of the header |
+| **Returns** | `String | Array` | The header value       |
 
-__Example__
+**Example**
 
 ```js
 res.getHeader('Content-Type'); // → application/json
@@ -57,16 +57,16 @@ res.getHeader('Content-Type'); // → application/json
 
 ### setHeader
 
-Set a header with a given name. If the value is falsy, the header will be
+Set a header with a given name. If the value is `null` or `undefined`, the header will be
 removed.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| name | `String` | The name of the header |
-| value | `String` | The value for the header |
-| __Returns__ | [Response](server/response) | The current response |
+| Param       | Type                        | Description              |
+| ----------- | --------------------------- | ------------------------ |
+| name        | `String`                    | The name of the header   |
+| value       | `String | Array`            | The value for the header |
+| **Returns** | [Response](server/response) | The current response     |
 
-__Example__
+**Example**
 
 ```js
 res.setHeader('Content-Length', 42);
@@ -74,33 +74,64 @@ res.setHeader('Content-Length', 42);
 
 ### setHeaders
 
-Add multiple headers at once. A falsy header value will remove that header
-altogether.
+Add multiple headers at once. If a value is `null` or `undefined`, the header will be
+removed.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| headers | `Object` | The headers to add to the response |
-| __Returns__ | [Response](server/response) | The current response |
+| Param       | Type                        | Description                        |
+| ----------- | --------------------------- | ---------------------------------- |
+| headers     | `Object`                    | The headers to add to the response |
+| **Returns** | [Response](server/response) | The current response               |
 
-__Example__
+**Example**
 
 ```js
 res.setHeaders({
+  Accept: ['text/html', 'image/*'],
   'Content-Type': 'application/json',
   'Content-Length': 42
 });
+```
+
+### removeHeader
+
+Remove a header with the given name.
+
+| Param       | Type                        | Description            |
+| ----------- | --------------------------- | ---------------------- |
+| name        | `String`                    | The name of the header |
+| **Returns** | [Response](server/response) | The current response   |
+
+**Example**
+
+```js
+res.removeHeader('Content-Length');
+```
+
+### removeHeaders
+
+Remove multiple headers at once.
+
+| Param       | Type                        | Description                             |
+| ----------- | --------------------------- | --------------------------------------- |
+| headers     | `Array`                     | The headers to remove from the response |
+| **Returns** | [Response](server/response) | The current response                    |
+
+**Example**
+
+```js
+res.removeHeaders(['Content-Type' 'Content-Length']);
 ```
 
 ### hasHeader
 
 Returns 'true' or 'false' depending on if the response has the given header.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| name | `String` | The name of the header |
-| __Returns__ | `Boolean` | &nbsp; |
+| Param       | Type      | Description            |
+| ----------- | --------- | ---------------------- |
+| name        | `String`  | The name of the header |
+| **Returns** | `Boolean` | &nbsp;                 |
 
-__Example__
+**Example**
 
 ```js
 res.hasHeader('X-AUTH'); // → false
@@ -110,12 +141,12 @@ res.hasHeader('X-AUTH'); // → false
 
 Sets the response's Content Type.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| value | `String` | &nbsp; |
-| __Returns__ | [Response](server/response) | The current response |
+| Param       | Type                        | Description          |
+| ----------- | --------------------------- | -------------------- |
+| value       | `String`                    | &nbsp;               |
+| **Returns** | [Response](server/response) | The current response |
 
-__Example__
+**Example**
 
 ```js
 res.type('application/json');
@@ -129,12 +160,12 @@ Sets the response's body.
 - If the body is a `String` and no charset is found, a `utf-8` charset is appended to the content type.
 - Body that is a `Boolean`, `Number`, or `Object` gets passed to the [json](#json) method.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| body | `any` | &nbsp; |
-| __Returns__ | [Response](server/response) | The current response |
+| Param       | Type                        | Description          |
+| ----------- | --------------------------- | -------------------- |
+| body        | `any`                       | &nbsp;               |
+| **Returns** | [Response](server/response) | The current response |
 
-__Example__
+**Example**
 
 ```js
 res.send('Hello World');
@@ -148,12 +179,12 @@ res.send();
 A shortcut method to set the status to the given status code, set the content
 type to `text/plain`, and call [send](#send).
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| status | `Number` | Status code |
-| __Returns__ | [Response](server/response) | The current response |
+| Param       | Type                        | Description          |
+| ----------- | --------------------------- | -------------------- |
+| status      | `Number`                    | Status code          |
+| **Returns** | [Response](server/response) | The current response |
 
-__Example__
+**Example**
 
 ```js
 res.sendStatus(200);
@@ -164,12 +195,12 @@ res.sendStatus(200);
 A shortcut method to set the content type to `application/json` if it hasn't
 been set already, and call [send](#send) with the stringified object.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| obj | `Object` | Object to send |
-| __Returns__ | [Response](server/response) | The current response |
+| Param       | Type                        | Description          |
+| ----------- | --------------------------- | -------------------- |
+| obj         | `Object`                    | Object to send       |
+| **Returns** | [Response](server/response) | The current response |
 
-__Example__
+**Example**
 
 ```js
 res.json({ Hello: 'World' });
@@ -181,11 +212,11 @@ A shortcut method that calls JSON.parse on the response's body.
 
 !> This method will throw if the body is an invalid JSON string.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| __Returns__ | `Object` | The JSON parsed body |
+| Param       | Type     | Description          |
+| ----------- | -------- | -------------------- |
+| **Returns** | `Object` | The JSON parsed body |
 
-__Example__
+**Example**
 
 ```js
 res.jsonBody();
@@ -195,11 +226,11 @@ res.jsonBody();
 
 Freeze the response and headers so they can no longer be modified.
 
-| Param | Type | Description |
-|  ---  | ---  |     ---     |
-| __Returns__ | [Response](server/response) | The current response |
+| Param       | Type                        | Description          |
+| ----------- | --------------------------- | -------------------- |
+| **Returns** | [Response](server/response) | The current response |
 
-__Example__
+**Example**
 
 ```js
 res.end();

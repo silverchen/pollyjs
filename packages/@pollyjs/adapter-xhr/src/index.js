@@ -1,7 +1,8 @@
 import FakeXHR from 'nise/lib/fake-xhr';
 import Adapter from '@pollyjs/adapter';
+
 import resolveXhr from './utils/resolve-xhr';
-import { XHR as XHRUtils } from '@pollyjs/utils';
+import serializeResponseHeaders from './utils/serialize-response-headers';
 
 const SEND = Symbol();
 const IS_STUBBED = Symbol();
@@ -23,14 +24,16 @@ export default class XHRAdapter extends Adapter {
 
     this.xhr.onCreate = xhr => {
       xhr[SEND] = xhr.send;
-      xhr.send = body =>
+      xhr.send = body => {
+        xhr[SEND](body);
         this.handleRequest({
           url: xhr.url,
           method: xhr.method || 'GET',
           headers: xhr.requestHeaders,
-          requestArguments: [xhr, body],
+          requestArguments: { xhr },
           body
         });
+      };
     };
 
     global.XMLHttpRequest[IS_STUBBED] = true;
@@ -41,37 +44,15 @@ export default class XHRAdapter extends Adapter {
     this.xhr.restore();
   }
 
-  async onRecord(pollyRequest) {
-    await this.passthroughRequest(pollyRequest);
-    await this.persister.recordRequest(pollyRequest);
-    this.respondToXhr(pollyRequest);
-  }
+  respondToRequest(pollyRequest) {
+    const { xhr } = pollyRequest.requestArguments;
+    const { response } = pollyRequest;
 
-  async onReplay(pollyRequest, { statusCode, headers, body }) {
-    await pollyRequest.respond(statusCode, headers, body);
-    this.respondToXhr(pollyRequest);
-  }
-
-  async onPassthrough(pollyRequest) {
-    await this.passthroughRequest(pollyRequest);
-    this.respondToXhr(pollyRequest);
-  }
-
-  async onIntercept(pollyRequest, { statusCode, headers, body }) {
-    await pollyRequest.respond(statusCode, headers, body);
-    this.respondToXhr(pollyRequest);
-  }
-
-  respondToXhr(pollyRequest) {
-    const [fakeXhr] = pollyRequest.requestArguments;
-    const { body, response } = pollyRequest;
-
-    fakeXhr[SEND](body);
-    fakeXhr.respond(response.statusCode, response.headers, response.body);
+    xhr.respond(response.statusCode, response.headers, response.body);
   }
 
   async passthroughRequest(pollyRequest) {
-    const [fakeXhr] = pollyRequest.requestArguments;
+    const fakeXhr = pollyRequest.requestArguments.xhr;
 
     const xhr = new this.native();
 
@@ -95,10 +76,11 @@ export default class XHRAdapter extends Adapter {
     }
 
     await resolveXhr(xhr, pollyRequest.body);
-    await pollyRequest.respond(
-      xhr.status,
-      XHRUtils.serializeResponseHeaders(xhr.getAllResponseHeaders()),
-      xhr.responseText
-    );
+
+    return {
+      statusCode: xhr.status,
+      headers: serializeResponseHeaders(xhr.getAllResponseHeaders()),
+      body: xhr.responseText
+    };
   }
 }

@@ -1,28 +1,29 @@
-import HTTPHeaders from '../utils/http-headers';
 import stringify from 'fast-json-stable-stringify';
+
+import HTTPHeaders from '../utils/http-headers';
 
 const { freeze } = Object;
 const { parse } = JSON;
 
 export default class HTTPBase {
-  public headers: {};
-  public body?: string;
+  headers: { [key: string]: string | string[] | null };
+  body?: string;
 
   constructor() {
     this.headers = HTTPHeaders();
   }
 
-  public getHeader(name: string): string {
+  getHeader(name: string): string | string[] {
     return this.headers[name];
   }
 
-  public setHeader(name: string, value: string): this {
+  setHeader(name: string, value?: string | string[] | null): this {
     this.headers[name] = value;
 
     return this;
   }
 
-  public setHeaders(headers = {}) {
+  setHeaders(headers = {}) {
     for (const name in headers) {
       this.setHeader(name, headers[name]);
     }
@@ -30,15 +31,29 @@ export default class HTTPBase {
     return this;
   }
 
-  public hasHeader(name: string): boolean {
+  removeHeader(name: string) {
+    this.setHeader(name, null);
+
+    return this;
+  }
+
+  removeHeaders(headers: string[] = []) {
+    for (const name of headers) {
+      this.removeHeader(name);
+    }
+
+    return this;
+  }
+
+  hasHeader(name: string): boolean {
     return !!this.getHeader(name);
   }
 
-  public type(type: string): this {
+  type(type: string): this {
     return this.setHeader('Content-Type', type);
   }
 
-  public send(data: any): this {
+  send(data: any): this {
     let body = data;
 
     switch (typeof body) {
@@ -75,7 +90,7 @@ export default class HTTPBase {
     return this;
   }
 
-  public json(obj?: {}): this {
+  json(obj?: {}): this {
     if (!this.hasHeader('Content-Type')) {
       this.type('application/json');
     }
@@ -83,11 +98,11 @@ export default class HTTPBase {
     return this.send(stringify(obj));
   }
 
-  public jsonBody(): {} {
+  jsonBody(): {} {
     return parse(this.body);
   }
 
-  public end(): this {
+  end(): this {
     freeze(this);
     freeze(this.headers);
 

@@ -1,8 +1,10 @@
-import toNVPairs, { NVPairs } from './utils/to-nv-pairs';
 import getByteLength from 'utf8-byte-length';
 import setCookies from 'set-cookie-parser';
 
-function headersSize(response: Response) {
+import toNVPairs from './utils/to-nv-pairs';
+import getFirstHeader from './utils/get-first-header';
+
+function headersSize(response: PollyResponse) {
   const keys: string[] = [];
   const values: string[] = [];
 
@@ -20,15 +22,15 @@ function headersSize(response: Response) {
 }
 
 export default class Response {
-  public httpVersion: string;
-  public status: number;
-  public statusText: string;
-  public headers: NVPairs;
-  public headersSize: number;
-  public redirectURL: string;
-  public cookies: setCookies.Cookie[];
-  public bodySize: number;
-  public content?: {
+  httpVersion: string;
+  status: number;
+  statusText: string;
+  headers: NVPairs;
+  headersSize: number;
+  redirectURL: string;
+  cookies: setCookies.Cookie[];
+  bodySize: number;
+  content: {
     mimeType: string
     size: number
     text?: string
@@ -41,10 +43,10 @@ export default class Response {
     this.headers = toNVPairs(response.headers);
     this.headersSize = headersSize(this);
     this.cookies = setCookies.parse(response.getHeader('Set-Cookie'));
-    this.redirectURL = '';
+    this.redirectURL = getFirstHeader(response, 'Location') || '';
 
     this.content = {
-      mimeType: response.getHeader('Content-Type') || 'text/plain',
+      mimeType: getFirstHeader(response, 'Content-Type') || 'text/plain',
       size: 0
     };
 
@@ -52,14 +54,16 @@ export default class Response {
       this.content.text = response.body;
     }
 
-    if (response.hasHeader('Content-Length')) {
-      this.content.size = parseInt(response.getHeader('Content-Length'), 10);
+    const contentLength = getFirstHeader(response, 'Content-Length');
+
+    if (contentLength) {
+      this.content.size = parseInt(contentLength, 10);
     } else {
       this.content.size = this.content.text
         ? getByteLength(this.content.text)
         : 0;
     }
 
-    this.bodySize = this.content ? this.content.size : 0;
+    this.bodySize = this.content.size;
   }
 }

@@ -1,8 +1,6 @@
 import { Polly } from '@pollyjs/core';
 import * as validate from 'har-validator/lib/async';
 
-const { keys } = Object;
-
 export default function persisterTests() {
   it('should persist valid HAR', async function() {
     const { recordingId, persister } = this.polly;
@@ -18,6 +16,7 @@ export default function persisterTests() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ foo: 'bar', bar: 'baz' })
     });
+
     await persister.persist();
 
     expect(await validate.har(await persister.find(recordingId))).to.be.true;
@@ -102,6 +101,98 @@ export default function persisterTests() {
     expect(beforePersistCalled).to.be.true;
   });
 
+  it('should respect recording name overrides', async function() {
+    const { server, persister } = this.polly;
+    const recordingName = 'Default Override';
+    let recordingId;
+
+    server
+      .get(this.recordUrl())
+      .recordingName(recordingName)
+      .on('request', req => {
+        expect(req.recordingName).to.equal(recordingName);
+        recordingId = req.recordingId;
+      });
+
+    this.polly.record();
+    await this.fetchRecord();
+    await persister.persist();
+
+    expect(recordingId).to.include('Override');
+
+    const har = await persister.find(recordingId);
+
+    expect(await validate.har(har)).to.be.true;
+    expect(har.log.entries).to.have.lengthOf(1);
+
+    // Set the new recording name so the afterEach hook deletes the recording
+    this.polly.recordingName = recordingName;
+  });
+
+  it('should correctly handle array header values', async function() {
+    const { recordingId, server, persister } = this.polly;
+    let responseCalled = false;
+
+    this.polly.record();
+
+    server
+      .get(this.recordUrl())
+      .configure({ matchRequestsBy: { order: false } })
+      .once('beforeResponse', (req, res) => {
+        res.setHeaders({
+          string: 'foo',
+          one: ['foo'],
+          two: ['foo', 'bar']
+        });
+      });
+
+    await this.fetchRecord();
+    await persister.persist();
+
+    const har = await persister.find(recordingId);
+    const { headers } = har.log.entries[0].response;
+
+    expect(await validate.har(har)).to.be.true;
+    expect(
+      headers.filter(({ _fromType }) => _fromType === 'array')
+    ).to.have.lengthOf(3);
+
+    this.polly.replay();
+
+    server.get(this.recordUrl()).once('response', (req, res) => {
+      expect(res.getHeader('string')).to.equal('foo');
+      expect(res.getHeader('one')).to.deep.equal(['foo']);
+      expect(res.getHeader('two')).to.deep.equal(['foo', 'bar']);
+      responseCalled = true;
+    });
+
+    await this.fetchRecord();
+    expect(responseCalled).to.be.true;
+  });
+
+  it('should correctly handle array header values where a single header is expected', async function() {
+    const { recordingId, server, persister } = this.polly;
+
+    this.polly.record();
+
+    server.get(this.recordUrl()).once('beforeResponse', (req, res) => {
+      res.setHeaders({
+        Location: ['./index.html'],
+        'Content-Type': ['application/json']
+      });
+    });
+
+    await this.fetchRecord();
+    await persister.persist();
+
+    const har = await persister.find(recordingId);
+    const { content, redirectURL } = har.log.entries[0].response;
+
+    expect(await validate.har(har)).to.be.true;
+    expect(content.mimeType).to.equal('application/json');
+    expect(redirectURL).to.equal('./index.html');
+  });
+
   it('should error when persisting a failed request', async function() {
     let error;
 
@@ -134,7 +225,43 @@ export default function persisterTests() {
 
     const har = await this.polly.persister.find(this.polly.recordingId);
 
-    expect(har).to.be.a('object');
-    expect(keys(har.log.entries)).to.have.lengthOf(1);
+    expect(har).to.be.an('object');
+    expect(har.log.entries).to.have.lengthOf(1);
+  });
+
+  it('should remove unused entries when `keepUnusedRequests` is false', async function() {
+    const { recordingName, recordingId, config } = this.polly;
+
+    const orderedRecordUrl = order => `${this.recordUrl()}?order=${order}`;
+
+    await this.fetch(orderedRecordUrl(1));
+    await this.fetch(orderedRecordUrl(2));
+    await this.polly.persister.persist();
+
+    let har = await this.polly.persister.find(recordingId);
+
+    expect(har).to.be.an('object');
+    expect(har.log.entries).to.have.lengthOf(2);
+
+    await this.polly.stop();
+
+    this.polly = new Polly(recordingName, config);
+    this.polly.replay();
+    this.polly.configure({
+      persisterOptions: {
+        keepUnusedRequests: false
+      }
+    });
+
+    await this.fetch(orderedRecordUrl(1)); // -> Replay
+    await this.fetch(orderedRecordUrl(3)); // -> New recording
+    await this.polly.persister.persist();
+
+    har = await this.polly.persister.find(recordingId);
+
+    expect(har).to.be.an('object');
+    expect(har.log.entries).to.have.lengthOf(2);
+    expect(har.log.entries[0].request.url).to.include(orderedRecordUrl(1));
+    expect(har.log.entries[1].request.url).to.include(orderedRecordUrl(3));
   });
 }

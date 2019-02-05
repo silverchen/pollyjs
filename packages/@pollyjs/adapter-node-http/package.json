@@ -1,0 +1,56 @@
+{
+  "name": "@pollyjs/adapter-node-http",
+  "version": "2.1.0",
+  "description": "Node HTTP adapter for @pollyjs",
+  "main": "dist/cjs/pollyjs-adapter-node-http.js",
+  "module": "dist/es/pollyjs-adapter-node-http.js",
+  "files": [
+    "src",
+    "dist"
+  ],
+  "repository": "https://github.com/netflix/pollyjs/tree/master/packages/@pollyjs/adapter-node-http",
+  "license": "Apache-2.0",
+  "contributors": [
+    {
+      "name": "Yasin Uslu",
+      "email": "a.yasin.uslu@gmail.com"
+    },
+    {
+      "name": "Jason Mitchell",
+      "email": "jason.mitchell.w@gmail.com"
+    },
+    {
+      "name": "Offir Golan",
+      "email": "offirgolan@gmail.com"
+    }
+  ],
+  "keywords": [
+    "polly",
+    "pollyjs",
+    "record",
+    "replay",
+    "http",
+    "adapter"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "test:build": "rollup -c rollup.config.test.js",
+    "watch": "yarn build -w"
+  },
+  "dependencies": {
+    "@pollyjs/adapter": "^2.1.0",
+    "@pollyjs/utils": "^2.1.0",
+    "lodash-es": "^4.17.11",
+    "nock": "^10.0.6",
+    "semver": "^5.6.0"
+  },
+  "devDependencies": {
+    "@pollyjs/core": "^2.1.0",
+    "@pollyjs/persister-fs": "^2.1.0",
+    "node-fetch": "^2.3.0",
+    "rollup": "^0.67.0"
+  }
+}

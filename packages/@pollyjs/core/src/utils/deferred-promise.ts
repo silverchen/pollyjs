@@ -1,16 +1,25 @@
+interface DeferredPromise extends Promise<void> {
+  resolve: Function;
+  reject: Function;
+}
+
 /**
  * Create a deferred promise with `resolve` and `reject` methods.
  */
-export default class DeferredPromise extends Promise {
-  constructor() {
-    let resolve, reject;
+export default function defer() {
+  let _resolve: Function;
+  let _reject: Function;
 
-    super((_resolve, _reject) => {
-      resolve = _resolve;
-      reject = _reject;
-    });
+  const promise = new Promise((resolve, reject) => {
+    _resolve = resolve;
+    _reject = reject;
+  }) as DeferredPromise;
 
-    this.resolve = resolve;
-    this.reject = reject;
-  }
+  // Prevent unhandled rejection warnings
+  promise.catch(() => {});
+
+  promise.resolve = _resolve;
+  promise.reject = _reject;
+
+  return promise;
 }

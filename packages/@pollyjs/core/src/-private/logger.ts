@@ -9,10 +9,9 @@ const FORMATTED_ACTIONS = {
 };
 
 export default class Logger {
-  public recordingName: string | null = null;
-  private _middleware: any;
-
-  constructor(public polly: Polly) {
+  constructor(polly) {
+    this.polly = polly;
+    this.groupName = null;
   }
 
   get enabled() {
@@ -32,40 +31,43 @@ export default class Logger {
 
   console(method, ...args) {
     if (this.enabled) {
-      this.groupStart();
+      this.groupStart(this.polly.recordingName);
       console[method].apply(console, args);
     }
   }
 
-  groupStart() {
-    // If the recording name has changed, end the current group so a new one
+  groupStart(groupName) {
+    // If the provided groupName is different, end the current group so a new one
     // can be started.
-    if (this.recordingName && this.recordingName !== this.polly.recordingName) {
+    if (this.groupName && this.groupName !== groupName) {
       this.groupEnd();
-      this.recordingName = null;
+      this.groupName = null;
     }
 
-    // Create a new console group for the current recording name if one
+    // Create a new console group for the provided groupName if one
     // doesn't already exist.
-    if (!this.recordingName) {
-      this.recordingName = this.polly.recordingName;
-      console.group(this.recordingName);
+    if (!this.groupName) {
+      this.groupName = groupName;
+      console.group(this.groupName);
     }
   }
 
   groupEnd() {
-    if (this.recordingName) {
-      console.groupEnd(this.recordingName);
+    if (this.groupName) {
+      console.groupEnd(this.groupName);
     }
   }
 
   logRequest(request) {
-    this.log(
-      `${FORMATTED_ACTIONS[request.action]} ➞ ${request.method} ${
-        request.url
-      } ${request.response.statusCode} • ${request.responseTime}ms`,
-      request
-    );
+    if (request.config.logging) {
+      this.groupStart(request.recordingName);
+      console.log(
+        `${FORMATTED_ACTIONS[request.action]} ➞ ${request.method} ${
+          request.url
+        } ${request.response.statusCode} • ${request.responseTime}ms`,
+        request
+      );
+    }
   }
 
   log() {

@@ -28,24 +28,29 @@ export interface PollyConfig {
       pathname: boolean;
       query: boolean;
       hash: boolean;
-    }
-  }
+    };
+  };
 }
 
 export default {
   mode: MODES.REPLAY,
-  logging: false,
-  recordIfMissing: true,
-  recordIfExpired: false,
-  recordFailedRequests: false,
-  expiresIn: null,
-  timing: Timing.fixed(0),
 
   adapters: [],
   adapterOptions: {},
 
   persister: null,
-  persisterOptions: {},
+  persisterOptions: {
+    keepUnusedRequests: false
+  },
+
+  logging: false,
+
+  recordIfMissing: true,
+  recordIfExpired: false,
+  recordFailedRequests: false,
+
+  expiresIn: null,
+  timing: Timing.fixed(0),
 
   matchRequestsBy: {
     method: true,

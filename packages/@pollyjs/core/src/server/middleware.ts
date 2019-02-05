@@ -1,4 +1,5 @@
 import RouteRecognizer from 'route-recognizer';
+
 import Route from './route';
 
 const GLOBAL = '__GLOBAL__';
@@ -11,7 +12,9 @@ export default class Middleware {
     this.paths = this.global ? [GLOBAL] : paths;
     this._routeRecognizer = new RouteRecognizer();
 
-    this.paths.forEach(path => this._routeRecognizer.add([{ path, handler }]));
+    this.paths.forEach(path =>
+      this._routeRecognizer.add([{ path, handler: [handler] }])
+    );
   }
 
   match(host, path) {

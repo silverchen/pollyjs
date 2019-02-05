@@ -2,8 +2,10 @@ import isObjectLike from 'lodash-es/isObjectLike';
 
 const { keys } = Object;
 
-export interface HTTPHeaders {
-  [key: string]: string
+export type HeaderValue = string | string[] | null | undefined;
+
+export interface IHTTPHeaders {
+  [key: string]: HeaderValue;
 }
 
 const HANDLER = {
@@ -16,18 +18,28 @@ const HANDLER = {
       return false;
     }
 
-    if (!value) {
+    if (value === null || typeof value === 'undefined') {
       delete obj[prop.toLowerCase()];
     } else {
       obj[prop.toLowerCase()] = value;
     }
 
     return true;
+  },
+
+  deleteProperty(obj, prop) {
+    if (typeof prop !== 'string') {
+      return false;
+    }
+
+    delete obj[prop.toLowerCase()];
+
+    return true;
   }
 };
 
-export default function HTTPHeaders(headers?: {}): HTTPHeaders {
-  const proxy = <HTTPHeaders>new Proxy({}, HANDLER);
+export default function HTTPHeaders(headers?: {}): IHTTPHeaders {
+  const proxy = <IHTTPHeaders>new Proxy({}, HANDLER);
 
   if (isObjectLike(headers)) {
     keys(headers).forEach(h => (proxy[h] = headers[h]));

@@ -1,6 +1,5 @@
 {
-  "lerna": "2.11.0",
-  "version": "independent",
+  "version": "2.1.0",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "packages": ["packages/@pollyjs/*"],
@@ -8,11 +7,8 @@
     "publish": {
       "allowBranch": "master",
       "conventionalCommits": true,
-      "message": "chore: Publish",
-      "ignoreChanges": [
-        "**/tests/**",
-        "**/*.md"
-      ]
+      "message": "chore: Publish %s",
+      "ignoreChanges": ["docs/**", "examples/**", "**/tests/**", "**/*.md"]
     }
   },
   "changelog": {

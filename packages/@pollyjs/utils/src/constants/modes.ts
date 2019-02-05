@@ -1,9 +1,8 @@
-// TODO update readme that these are now uppercase strings
 enum MODES {
-  RECORD = 'RECORD',
-  REPLAY = 'REPLAY',
-  PASSTHROUGH = 'PASSTHROUGH',
-  STOPPED = 'STOPPED'
+  RECORD = 'record',
+  REPLAY = 'replay',
+  PASSTHROUGH = 'passthrough',
+  STOPPED = 'stopped'
 }
 
 export default MODES;

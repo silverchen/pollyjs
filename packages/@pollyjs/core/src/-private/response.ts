@@ -1,5 +1,6 @@
-import HTTPBase from './http-base';
 import { assert, HTTP_STATUS_CODES } from '@pollyjs/utils';
+
+import HTTPBase from './http-base';
 
 const DEFAULT_STATUS_CODE = 200;
 
@@ -45,6 +46,6 @@ export default class PollyResponse extends HTTPBase {
     this.status(status);
     this.type('text/plain');
 
-    return this.send(status);
+    return this.send(this.statusText);
   }
 }

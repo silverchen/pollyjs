@@ -11,7 +11,7 @@ module.exports = {
   launch_in_ci: ['Chrome', 'Node', 'Jest', 'Ember', 'ESLint'],
   launch_in_dev: ['Chrome', 'Node', 'Jest', 'Ember', 'ESLint'],
   watch_files: [
-    './build-scripts/**/*',
+    './scripts/rollup/**/*',
     './tests/*',
     './tests/!(recordings)/**/*',
     './packages/@pollyjs/*/src/**/*',
@@ -22,9 +22,12 @@ module.exports = {
     Chrome: {
       ci: [
         // --no-sandbox is needed when running Chrome inside a container
-        process.env.TRAVIS ? '--no-sandbox' : null,
-        '--disable-gpu',
+        process.env.CI ? '--no-sandbox' : null,
         '--headless',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-software-rasterizer',
+        '--mute-audio',
         '--remote-debugging-port=0',
         '--window-size=1440,900'
       ].filter(Boolean)
@@ -45,7 +48,7 @@ module.exports = {
       protocol: 'tap'
     },
     ESLint: {
-      command: 'yarn lint -- -- --format tap >&1 | tap-merge',
+      command: 'yarn lint --format tap',
       protocol: 'tap'
     }
   }

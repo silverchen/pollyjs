@@ -1,5 +1,5 @@
 export default function(msg: string, condition: unknown) {
-  if (typeof condition === 'undefined' || condition === false) {
+  if (!condition) {
     throw new Error(`[Polly] ${msg}`);
   }
 }

@@ -1,6 +1,9 @@
 /* eslint-env node */
 const path = require('path');
+
 const bodyParser = require('body-parser');
+const compression = require('compression');
+
 const { registerExpressAPI } = require('../packages/@pollyjs/node-server');
 
 const DB = {};
@@ -14,6 +17,11 @@ module.exports = function attachMiddleware(app) {
 
   app.get('/echo', (req, res) => {
     res.sendStatus(req.query.status);
+  });
+
+  app.post('/compress', compression({ filter: () => true }), (req, res) => {
+    res.write(JSON.stringify(req.body));
+    res.end();
   });
 
   app.get('/api', (req, res) => {

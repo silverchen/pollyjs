@@ -9,4 +9,13 @@ build
 dist
 *.lerna_backup
 .npmrc
-.rts2_cache
+
+# Test recordings can write be written here if the test job did not
+# get a chance to run to completion.  The test will cleans these files up afterwards.
+/recordings
+
+# Examples
+examples/**/*/yarn.lock
+
+# IDE
+.vscode/
