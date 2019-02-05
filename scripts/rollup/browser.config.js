@@ -20,11 +20,16 @@ export default function createBrowserConfig(options = {}, targets) {
       plugins: [
         alias(lerna()),
         json(),
-        resolve({ browser: true, preferBuiltins: true }),
+        resolve({
+          browser: true,
+          preferBuiltins: true,
+          extensions: ['.js', '.ts']
+        }),
         commonjs(),
         babel({
           babelrc: false,
           runtimeHelpers: true,
+          extensions: ['.js', '.ts'],
           exclude: ['../../../node_modules/**'],
           presets: [
             [

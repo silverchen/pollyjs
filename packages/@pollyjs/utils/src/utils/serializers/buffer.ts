@@ -3,7 +3,7 @@
 export const supportsBuffer = typeof Buffer !== 'undefined';
 export const supportsArrayBuffer = typeof ArrayBuffer !== 'undefined';
 
-export function serialize(body) {
+export function serialize(body: any) {
   if (supportsBuffer && body) {
     let buffer;
 

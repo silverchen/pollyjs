@@ -5,7 +5,7 @@ const ARRAY_FORMAT = Symbol();
 const INDICES_REGEX = /\[\d+\]$/;
 const BRACKETS_REGEX = /\[\]$/;
 
-function parseQuery(query, options) {
+function parseQuery(query: string, options: qs.IParseOptions = {}) {
   return qs.parse(query, {
     plainObjects: true,
     ignoreQueryPrefix: true,
@@ -13,7 +13,7 @@ function parseQuery(query, options) {
   });
 }
 
-function stringifyQuery(obj, options = {}) {
+function stringifyQuery(obj: object, options: qs.IStringifyOptions = {}) {
   return qs.stringify(obj, { addQueryPrefix: true, ...options });
 }
 
@@ -24,7 +24,7 @@ function stringifyQuery(obj, options = {}) {
  * @param {String} query
  * @returns {String | undefined}
  */
-function arrayFormat(query) {
+function arrayFormat(query?: string) {
   const keys = (query || '')
     .replace('?', '')
     .split('&')
@@ -54,7 +54,9 @@ function arrayFormat(query) {
  * `querystringify` to support array and nested object query param strings.
  */
 export default class URL extends URLParse {
-  constructor(url, parse) {
+  [ARRAY_FORMAT]: 'indices' | 'brackets' | 'repeat' | undefined;
+
+  constructor(url: string, parse?: boolean) {
     // Construct the url with an un-parsed querystring
     super(url);
 
@@ -72,7 +74,7 @@ export default class URL extends URLParse {
    *
    * @override
    */
-  set(part, value, fn) {
+  set(part: URLParse.URLPart, value: any, fn?: URLParse.QueryParser) {
     if (part === 'query') {
       if (value && typeof value === 'string') {
         // Save the array format used so when we stringify it,
@@ -93,7 +95,7 @@ export default class URL extends URLParse {
    * @override
    */
   toString() {
-    return super.toString(obj =>
+    return super.toString((obj: object) =>
       stringifyQuery(obj, { arrayFormat: this[ARRAY_FORMAT] })
     );
   }

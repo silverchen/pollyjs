@@ -1,4 +1,4 @@
-interface ResponseHeaders {
+interface IResponseHeaders {
   [key: string]: string;
 }
 
@@ -7,18 +7,22 @@ interface ResponseHeaders {
  *
  * @param {String} responseHeaders
  */
-export default function serializeResponseHeaders(responseHeaders: string): ResponseHeaders {
+export default function serializeResponseHeaders(
+  responseHeaders: string
+): IResponseHeaders {
   if (typeof responseHeaders !== 'string') {
     return responseHeaders;
   }
 
-  return responseHeaders.split('\n').reduce((headers: ResponseHeaders, header) => {
-    const [key, value] = header.split(':');
+  return responseHeaders
+    .split('\n')
+    .reduce((headers: IResponseHeaders, header) => {
+      const [key, value] = header.split(':');
 
-    if (key) {
-      headers[key] = value.replace(/(\r|\n|^\s+)/g, '');
-    }
+      if (key) {
+        headers[key] = value.replace(/(\r|\n|^\s+)/g, '');
+      }
 
-    return headers;
-  }, {});
+      return headers;
+    }, {});
 }

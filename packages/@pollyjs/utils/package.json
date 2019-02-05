@@ -5,6 +5,7 @@
   "main": "dist/cjs/pollyjs-utils.js",
   "module": "dist/es/pollyjs-utils.js",
   "browser": "dist/umd/pollyjs-utils.js",
+  "types": "dist/types/index.d.ts",
   "files": [
     "src",
     "dist"
@@ -39,6 +40,9 @@
     "url-parse": "^1.4.4"
   },
   "devDependencies": {
-    "rollup": "^0.67.0"
+    "@types/qs": "^6.5.1",
+    "@types/url-parse": "^1.4.2",
+    "rollup": "^0.67.0",
+    "typescript": "^3.3.1"
   }
 }

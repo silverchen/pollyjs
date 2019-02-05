@@ -18,11 +18,15 @@ export default function createNodeConfig(options = {}) {
       external,
       plugins: [
         json(),
-        resolve({ preferBuiltins: true }),
+        resolve({
+          preferBuiltins: true,
+          extensions: ['.js', '.ts']
+        }),
         commonjs(),
         babel({
           babelrc: false,
           runtimeHelpers: true,
+          extensions: ['.js', '.ts'],
           exclude: ['../../../node_modules/**'],
           presets: [
             [

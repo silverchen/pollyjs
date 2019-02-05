@@ -1,7 +1,7 @@
 import isObjectLike from 'lodash-es/isObjectLike';
 import { assert } from '@pollyjs/utils';
 
-export function validateRecordingName(name) {
+export function validateRecordingName(name: string) {
   assert(
     `Invalid recording name provided. Expected string, received: "${typeof name}".`,
     typeof name === 'string'
@@ -13,7 +13,7 @@ export function validateRecordingName(name) {
   );
 }
 
-export function validateRequestConfig(config) {
+export function validateRequestConfig(config: object) {
   assert(
     `Invalid config provided. Expected object, received: "${typeof config}".`,
     isObjectLike(config)

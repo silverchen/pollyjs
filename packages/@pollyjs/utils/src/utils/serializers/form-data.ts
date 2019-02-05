@@ -2,7 +2,7 @@ import { supportsBlob, readBlob } from './blob';
 
 export const supportsFormData = typeof FormData !== 'undefined';
 
-export async function serialize(body) {
+export async function serialize(body: any) {
   if (supportsFormData && body instanceof FormData) {
     const data = [];
 

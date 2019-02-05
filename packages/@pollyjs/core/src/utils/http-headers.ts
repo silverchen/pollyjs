@@ -2,8 +2,10 @@ import isObjectLike from 'lodash-es/isObjectLike';
 
 const { keys } = Object;
 
-export interface HTTPHeaders {
-  [key: string]: string
+export type HeaderValue = string | string[] | null | undefined;
+
+export interface IHTTPHeaders {
+  [key: string]: HeaderValue;
 }
 
 const HANDLER = {
@@ -36,8 +38,8 @@ const HANDLER = {
   }
 };
 
-export default function HTTPHeaders(headers?: {}): HTTPHeaders {
-  const proxy = <HTTPHeaders>new Proxy({}, HANDLER);
+export default function HTTPHeaders(headers?: {}): IHTTPHeaders {
+  const proxy = <IHTTPHeaders>new Proxy({}, HANDLER);
 
   if (isObjectLike(headers)) {
     keys(headers).forEach(h => (proxy[h] = headers[h]));

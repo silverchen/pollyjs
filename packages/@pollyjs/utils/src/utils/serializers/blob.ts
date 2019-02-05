@@ -6,18 +6,18 @@ export const supportsBlob = (() => {
   }
 })();
 
-export function readBlob(blob) {
+export function readBlob(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onend = reject;
+    reader.onerror = reject;
     reader.onabort = reject;
-    reader.onload = () => resolve(reader.result);
+    reader.onload = () => resolve(reader.result as string);
     reader.readAsDataURL(new Blob([blob], { type: blob.type }));
   });
 }
 
-export async function serialize(body) {
+export async function serialize(body: any) {
   if (supportsBlob && body instanceof Blob) {
     return await readBlob(body);
   }

@@ -5,6 +5,7 @@
   "main": "dist/cjs/pollyjs-core.js",
   "module": "dist/es/pollyjs-core.js",
   "browser": "dist/umd/pollyjs-core.js",
+  "types": "dist/types/index.d.ts",
   "files": [
     "src",
     "dist"
@@ -53,8 +54,10 @@
     "@pollyjs/adapter": "^2.1.0",
     "@pollyjs/persister": "^2.1.0",
     "@types/blueimp-md5": "^2.7.0",
+    "@types/fast-json-stable-stringify": "^2.0.0",
     "@types/is-absolute-url": "^2.1.0",
     "@types/lodash-es": "^4.17.1",
+    "@types/sindresorhus__fnv1a": "^1.0.0",
     "rollup": "^0.67.0"
   }
 }

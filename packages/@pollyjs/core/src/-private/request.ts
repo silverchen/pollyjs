@@ -29,23 +29,23 @@ const SUPPORTED_EVENTS = ['identify'];
 export default class PollyRequest extends HTTPBase {
   method: string;
   body?: string;
-  serializedBody: string;
   recordingName: string;
   recordingId: string;
   requestArguments: any[];
   promise: Promise<void>;
-  action?: string;
-  timestamp: string;
-  response: PollyResponse;
+  action: string | null;
+  timestamp?: string;
+  response?: PollyResponse;
   didRespond: boolean;
-  responseTime: number;
-  id: string;
-  order: number;
-  identifiers: {};
+  responseTime?: number;
+  id?: string;
+  order?: number;
+  identifiers?: {};
 
   private [POLLY]: Polly;
   private [ROUTE]: Route;
   private [PARSED_URL]: URL;
+  private [EVENT_EMITTER]: EventEmitter;
 
   constructor(polly, request) {
     super();
