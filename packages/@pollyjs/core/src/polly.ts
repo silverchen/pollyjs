@@ -12,8 +12,6 @@ import EventEmitter from './-private/event-emitter';
 import Server from './server';
 import { validateRecordingName } from './utils/validators';
 
-type ValidMode = keyof typeof MODES;
-
 interface FactoryRegistrationCallback {
   (container: Container): void;
 }
@@ -35,37 +33,22 @@ const EVENT_EMITTER = new EventEmitter({
  * @class Polly
  */
 export default class Polly {
-  public [RECORDING_NAME]: string;
-  public [RECORDING_ID]: string;
-  public [PAUSED_MODE]: string;
-  public logger: Logger;
-  public server: Server;
-  public container: Container;
-  public adapters: Map<string, Adapter>;
-  public persister: Persister | null;
-  private _requests: PollyRequest[];
+  config: PollyConfig;
+  logger: Logger = new Logger(this);
+  server: Server = new Server();
+  container: Container = new Container();
+  adapters: Map<string, Adapter> = new Map();
+  persister: Persister | null = null;
+  _requests: PollyRequest[] = [];
 
-  constructor(
-    recordingName: string,
-    public config: PollyConfig = { mode: 'REPLAY' }
-  ) {
+  private [RECORDING_NAME]: string;
+  private [RECORDING_ID]: string;
+  private [PAUSED_MODE]: string;
+
+  constructor(recordingName: string, config: PollyConfig) {
     this.recordingName = recordingName;
-    this.logger = new Logger(this);
-    this.server = new Server();
-    this.container = new Container();
-
-    EVENT_EMITTER.emitSync('register', this.container);
-
-    /* running adapter instances */
-    this.adapters = new Map();
-
-    /* running persister instance */
-    this.persister = null;
-
-    /* requests over the lifetime of the polly instance */
-    this._requests = [];
-
     this.logger.connect();
+    EVENT_EMITTER.emitSync('register', this.container);
     EVENT_EMITTER.emitSync('create', this);
     this.configure(config);
   }
@@ -105,7 +88,7 @@ export default class Polly {
     return this[RECORDING_ID];
   }
 
-  get mode(): ValidMode {
+  get mode() {
     return this.config.mode;
   }
 
@@ -113,13 +96,13 @@ export default class Polly {
     const possibleModes = Object.values(MODES);
 
     assert(
-      `Invalid mode provided: "${uppercaseMode}". Possible modes: ${possibleModes.join(
+      `Invalid mode provided: "${mode}". Possible modes: ${possibleModes.join(
         ', '
       )}.`,
-      possibleModes.includes(uppercaseMode)
+      possibleModes.includes(mode)
     );
 
-    this.config.mode = uppercaseMode;
+    this.config.mode = mode;
   }
 
   static on(eventName, listener) {

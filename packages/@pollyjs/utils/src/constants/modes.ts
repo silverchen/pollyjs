@@ -1,8 +1,6 @@
-enum MODES {
-  RECORD = 'record',
-  REPLAY = 'replay',
-  PASSTHROUGH = 'passthrough',
-  STOPPED = 'stopped'
-}
-
-export default MODES;
+export default {
+  RECORD: 'record',
+  REPLAY: 'replay',
+  PASSTHROUGH: 'passthrough',
+  STOPPED: 'stopped'
+};

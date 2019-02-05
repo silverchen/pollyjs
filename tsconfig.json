@@ -14,18 +14,10 @@
     // "isolatedModules": true,
     // Import non-ES modules as default imports.
     "esModuleInterop": true,
-
+    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-
-    "declarationMap": false,
     "declaration": true,
-    // "composite": true,
-
+    "declarationMap": false,
     "emitDeclarationOnly": true
-
-    // "baseUrl": ".",
-    // "paths": {
-    //   "@pollyjs/*": ["packages/@pollyjs/*"]
-    // }
   }
 }
