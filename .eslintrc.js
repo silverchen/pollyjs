@@ -50,6 +50,19 @@ module.exports = {
     ]
   },
   overrides: [
+    {
+      files: ['**/*.ts'],
+      excludedFiles: '**/*.js',
+      parser: 'typescript-eslint-parser',
+      parserOptions: {
+        ecmaVersion: 2018,
+        sourceType: 'module'
+      },
+      plugins: ['typescript'],
+      rules: {
+        'typescript/rule-name': 'error'
+      }
+    },
     // test files
     {
       files: ['tests/**/*.js', '**/*/tests/**/*.js'],

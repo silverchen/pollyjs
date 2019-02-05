@@ -32,12 +32,17 @@ export default function createNodeConfig(options = {}) {
                   node: '8.0.0'
                 }
               }
-            ]
+            ],
+            '@babel/preset-typescript'
           ],
           plugins: [
             '@babel/plugin-external-helpers',
             ['@babel/plugin-transform-runtime', { corejs: 2 }],
-            ['@babel/plugin-proposal-object-rest-spread', { useBuiltIns: true }]
+            [
+              '@babel/plugin-proposal-object-rest-spread',
+              { useBuiltIns: true }
+            ],
+            '@babel/proposal-class-properties'
           ]
         }),
         minify && terser()
