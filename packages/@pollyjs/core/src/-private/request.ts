@@ -16,6 +16,7 @@ import {
 import HTTPBase from './http-base';
 import PollyResponse from './response';
 import EventEmitter from './event-emitter';
+import { IPollyConfig } from '../defaults/config';
 
 const { keys, freeze } = Object;
 
@@ -36,6 +37,7 @@ export default class PollyRequest extends HTTPBase {
   action: string | null;
   timestamp?: string;
   response?: PollyResponse;
+  config!: IPollyConfig;
   didRespond: boolean;
   responseTime?: number;
   id?: string;

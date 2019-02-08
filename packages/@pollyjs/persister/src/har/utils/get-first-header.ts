@@ -9,7 +9,10 @@ const { isArray } = Array;
  * @param {string} name
  * @returns {string | undefined}
  */
-export default function getFirstHeader(r, name) {
+export default function getFirstHeader(
+  r: PollyRequest | PollyResponse,
+  name: string
+) {
   const value = r.getHeader(name);
 
   if (isArray(value)) {

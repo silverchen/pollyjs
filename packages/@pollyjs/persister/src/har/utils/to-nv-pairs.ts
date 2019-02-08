@@ -1,14 +1,14 @@
 const { keys } = Object;
 const { isArray } = Array;
 
-export interface NVPairs extends Array<{
-  name: string
-  value: string
-  _fromType?: string
-}> {}
+export interface INVPair {
+  name: string;
+  value: string;
+  _fromType?: string;
+}
 
 export default function toNVPairs(o: { [key: string]: string | string[] }) {
-  return keys(o || {}).reduce((pairs: NVPairs, name: string) => {
+  return keys(o || {}).reduce((pairs: INVPair[], name: string) => {
     const value = o[name];
 
     if (isArray(value)) {

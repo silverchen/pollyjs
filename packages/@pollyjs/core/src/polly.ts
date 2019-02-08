@@ -4,7 +4,7 @@ import { version } from '../package.json';
 
 import Logger from './-private/logger';
 import Container, { FactoryFn } from './-private/container';
-import DefaultConfig, { PollyConfig } from './defaults/config';
+import DefaultConfig, { IPollyConfig } from './defaults/config';
 import PollyRequest from './-private/request';
 import guidForRecording from './utils/guid-for-recording';
 import mergeConfigs from './utils/merge-configs';
@@ -33,7 +33,7 @@ const EVENT_EMITTER = new EventEmitter({
  * @class Polly
  */
 export default class Polly {
-  config: PollyConfig;
+  config!: IPollyConfig;
   logger: Logger = new Logger(this);
   server: Server = new Server();
   container: Container = new Container();
@@ -45,7 +45,7 @@ export default class Polly {
   private [RECORDING_ID]: string;
   private [PAUSED_MODE]: string;
 
-  constructor(recordingName: string, config: PollyConfig) {
+  constructor(recordingName: string, config: IPollyConfig) {
     this.recordingName = recordingName;
     this.logger.connect();
     EVENT_EMITTER.emitSync('register', this.container);

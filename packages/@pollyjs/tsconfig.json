@@ -1,0 +1,18 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./adapter" },
+    // { "path": "./adapter-fetch" },
+    // { "path": "./adapter-node-http" },
+    // { "path": "./adapter-puppeteer" },
+    // { "path": "./adapter-xhr" },
+    // { "path": "./cli" },
+    { "path": "./core" },
+    // { "path": "./node-server" },
+    { "path": "./persister" },
+    // { "path": "./persister-fs" },
+    // { "path": "./persister-local-storage" },
+    // { "path": "./persister-rest" },
+    { "path": "./utils" }
+  ]
+}

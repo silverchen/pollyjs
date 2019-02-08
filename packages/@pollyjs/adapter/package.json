@@ -12,6 +12,7 @@
   "repository": "https://github.com/netflix/pollyjs/tree/master/packages/@pollyjs/adapter",
   "scripts": {
     "build": "rollup -c ../../../scripts/rollup/default.config.js",
+    "build:types": "tsc -b .",
     "test:build": "rollup -c rollup.config.test.js",
     "watch": "yarn build -w"
   },
@@ -38,6 +39,7 @@
     "@pollyjs/utils": "^2.1.0"
   },
   "devDependencies": {
-    "rollup": "^0.67.0"
+    "rollup": "^0.67.0",
+    "typescript": "^3.3.1"
   }
 }

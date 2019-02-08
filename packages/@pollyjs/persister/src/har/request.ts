@@ -33,10 +33,10 @@ export default class Request {
   cookies: setCookies.Cookie[];
   bodySize: number;
   postData?: {
-    mimeType: string
-    params: Object[],
-    text?: string,
-  }
+    mimeType: string;
+    params: Object[];
+    text?: string;
+  };
 
   constructor(request: PollyRequest) {
     this.httpVersion = 'HTTP/1.1';

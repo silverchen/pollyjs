@@ -1,5 +1,7 @@
 import { afterEach, beforeEach } from './lib';
 
+type Global = NodeJS.Global | Window;
+
 function generateRecordingName(context) {
   const { currentTest } = context;
   const parts = [currentTest.title];
@@ -13,18 +15,21 @@ function generateRecordingName(context) {
   return parts.reverse().join('/');
 }
 
-export default function setupMocha(defaults = {}, ctx = global) {
+export default function setupMocha(defaults = {}, ctx: Global = global) {
   setupMocha.beforeEach(defaults, ctx);
   setupMocha.afterEach(ctx);
 }
 
-setupMocha.beforeEach = function setupMochaBeforeEach(defaults, ctx = global) {
+setupMocha.beforeEach = function setupMochaBeforeEach(
+  defaults,
+  ctx: Global = global
+) {
   ctx.beforeEach(function() {
     return beforeEach(this, generateRecordingName(this), defaults);
   });
 };
 
-setupMocha.afterEach = function setupMochaAfterEach(ctx = global) {
+setupMocha.afterEach = function setupMochaAfterEach(ctx: Global = global) {
   ctx.afterEach(function() {
     return afterEach(this, 'mocha');
   });

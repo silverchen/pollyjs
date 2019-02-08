@@ -8,7 +8,7 @@ const CREATOR_NAME = 'Polly.JS';
 
 export default class Persister {
   polly: Polly;
-  pending: Map<string, { name: string, requests: PollyRequest[] }>;
+  pending: Map<string, { name: string; requests: PollyRequest[] }>;
   private _cache: Map<string, Promise<HAR | null>>;
 
   constructor(polly: Polly) {

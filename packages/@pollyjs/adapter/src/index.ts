@@ -4,7 +4,10 @@ import Interceptor from './-private/interceptor';
 import isExpired from './utils/is-expired';
 import stringifyRequest from './utils/stringify-request';
 import normalizeRecordedResponse from './utils/normalize-recorded-response';
-import Entry from '../../persister/src/har/entry';
+
+import Polly from '../../core/src/polly';
+import PollyRequest from '../../core/src/-private/request';
+import PollyResponse from '../../core/src/-private/response';
 
 interface NormalizedResponse {
   statusCode: number;
@@ -23,11 +26,10 @@ const REQUEST_HANDLER = Symbol();
 
 export default class Adapter {
   polly: Polly;
-  isConnected: boolean;
+  isConnected: boolean = false;
 
   constructor(polly: Polly) {
     this.polly = polly;
-    this.isConnected = false;
   }
 
   static get type() {

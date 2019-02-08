@@ -40,6 +40,7 @@
     "build": "lerna run build --ignore=@pollyjs/ember --parallel",
     "build:prod": "NODE_ENV=production yarn build && NODE_ENV=production MINIFY=true yarn build",
     "build:watch": "npm-run-all clean watch",
+    "build:types": "tsc -b ./packages/@pollyjs",
     "watch": "lerna run watch --ignore=@pollyjs/ember --parallel",
     "clean": "rimraf packages/@pollyjs/*/dist",
     "lint": "eslint .",

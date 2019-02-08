@@ -1,7 +1,7 @@
 import { MODES } from '@pollyjs/utils';
 import Timing from '../utils/timing';
 
-export interface PollyConfig {
+export interface IPollyConfig {
   mode: string;
   logging: boolean;
   recordIfMissing: boolean;
@@ -69,4 +69,4 @@ export default {
       hash: false
     }
   }
-} as PollyConfig;
+} as IPollyConfig;

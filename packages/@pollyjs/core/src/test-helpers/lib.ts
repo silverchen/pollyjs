@@ -1,7 +1,12 @@
 import Polly from '../polly';
+
 const { defineProperty } = Object;
 
-export function beforeEach(context: {}, recordingName: string, defaults?: {}) {
+export function beforeEach(
+  context: object,
+  recordingName: string,
+  defaults?: PollyConfig
+) {
   defineProperty(context, 'polly', {
     writable: true,
     enumerable: true,

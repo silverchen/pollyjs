@@ -1,8 +1,10 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "../../../tsconfig.settings.json",
   "compilerOptions": {
-    "allowJs": false,
-    "declarationDir": "dist/types"
+    "declarationDir": "./dist/types",
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
-  "include": ["src"]
+  "include": ["src"],
+  "references": []
 }

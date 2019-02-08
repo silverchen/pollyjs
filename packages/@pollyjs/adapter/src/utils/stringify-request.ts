@@ -1,4 +1,9 @@
-export default function stringifyRequest(req, ...args) {
+import PollyRequest from '../../../core/src/-private/request';
+
+export default function stringifyRequest(
+  req: PollyRequest,
+  ...stringifyArgs: any[]
+) {
   return JSON.stringify(
     {
       url: req.url,
@@ -11,6 +16,6 @@ export default function stringifyRequest(req, ...args) {
       identifiers: req.identifiers,
       config: req.config
     },
-    ...args
+    ...stringifyArgs
   );
 }
