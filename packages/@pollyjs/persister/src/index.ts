@@ -1,5 +1,8 @@
 import stringify from 'fast-json-stable-stringify';
 import { ACTIONS, assert } from '@pollyjs/utils';
+import Polly from '@pollyjs/core/polly';
+import PollyRequest from '@pollyjs/core/-private/request';
+import PollyResponse from '@pollyjs/core/-private/response';
 
 import HAR from './har';
 import Entry from './har/entry';
@@ -21,6 +24,7 @@ export default class Persister {
     return 'persister';
   }
 
+  // @ts-ignore
   static get name() {
     assert('Must override the static `name` getter.');
 
@@ -56,9 +60,11 @@ export default class Persister {
 
     const promises: Promise<void>[] = [];
     const { type, name } = this.constructor as typeof Persister;
+    const { VERSION } = this.polly.constructor as typeof Polly;
+
     const creator = {
       name: CREATOR_NAME,
-      version: this.polly.constructor.VERSION,
+      version: VERSION,
       comment: `${type}:${name}`
     };
 
@@ -82,7 +88,8 @@ export default class Persister {
           } because the status code was ${
             entry.response.status
           } and \`recordFailedRequests\` is \`false\``,
-          request.response.ok || request.config.recordFailedRequests
+          (<PollyResponse>request.response).ok ||
+            request.config.recordFailedRequests
         );
 
         /*
@@ -181,7 +188,7 @@ export default class Persister {
     return stringify(data, options);
   }
 
-  assert(message: string, condition?: boolean) {
+  assert(message: string, condition?: unknown) {
     const { type, name } = this.constructor as typeof Persister;
 
     assert(`[${type}:${name}] ${message}`, condition);

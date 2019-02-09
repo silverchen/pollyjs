@@ -60,6 +60,6 @@
     "@types/lodash-es": "^4.17.1",
     "@types/sindresorhus__fnv1a": "^1.0.0",
     "rollup": "^0.67.0",
-    "typescript": "^3.3.1"
+    "typescript": "^3.3.3"
   }
 }

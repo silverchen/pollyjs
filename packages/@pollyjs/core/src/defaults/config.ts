@@ -10,24 +10,29 @@ export interface IPollyConfig {
   expiresIn?: string | null;
   timing: Function;
   adapters: (string | Function)[];
-  adapterOptions: {};
+  adapterOptions: {
+    [key: string]: any;
+  };
   persister?: string | Function | null;
-  persisterOptions: {};
+  persisterOptions: {
+    [key: string]: any;
+    keepUnusedRequests: boolean;
+  };
 
   matchRequestsBy: {
-    method: boolean;
-    headers: boolean | { excludes: string[] };
-    body: boolean;
+    method: boolean | Function;
+    headers: boolean | Function | { excludes: string[] };
+    body: boolean | Function;
     order: boolean;
     url: {
-      protocol: boolean;
-      username: boolean;
-      password: boolean;
-      hostname: boolean;
-      port: boolean;
-      pathname: boolean;
-      query: boolean;
-      hash: boolean;
+      protocol: boolean | Function;
+      username: boolean | Function;
+      password: boolean | Function;
+      hostname: boolean | Function;
+      port: boolean | Function;
+      pathname: boolean | Function;
+      query: boolean | Function;
+      hash: boolean | Function;
     };
   };
 }

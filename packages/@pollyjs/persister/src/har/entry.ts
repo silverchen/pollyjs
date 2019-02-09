@@ -1,6 +1,9 @@
 import Request from './request';
 import Response from './response';
 
+import PollyRequest from '@pollyjs/core/-private/request';
+import PollyResponse from '@pollyjs/core/-private/response';
+
 const { keys } = Object;
 
 interface Timings {
@@ -24,7 +27,7 @@ function totalTime(timings = {} as Timings) {
 
 export default class Entry {
   public _id: string;
-  public _order: string;
+  public _order: number;
   public startedDateTime: string;
   public request: Request;
   public response: Response;
@@ -33,11 +36,11 @@ export default class Entry {
   public time: number;
 
   constructor(request: PollyRequest) {
-    this._id = request.id;
-    this._order = request.order;
-    this.startedDateTime = request.timestamp;
+    this._id = request.id as string;
+    this._order = request.order as number;
+    this.startedDateTime = request.timestamp as string;
     this.request = new Request(request);
-    this.response = new Response(request.response);
+    this.response = new Response(request.response as PollyResponse);
     this.cache = {};
     this.timings = {
       blocked: -1,

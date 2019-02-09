@@ -1,10 +1,11 @@
 import getByteLength from 'utf8-byte-length';
 import setCookies from 'set-cookie-parser';
+import PollyRequest from '@pollyjs/core/-private/request';
 
-import toNVPairs from './utils/to-nv-pairs';
+import toNVPairs, { INVPair } from './utils/to-nv-pairs';
 import getFirstHeader from './utils/get-first-header';
 
-function headersSize(request: PollyRequest) {
+function headersSize(request: Request) {
   const keys: string[] = [];
   const values: string[] = [];
 
@@ -27,9 +28,9 @@ export default class Request {
   httpVersion: string;
   url: string;
   method: string;
-  headers: NVPairs;
+  headers: INVPair[];
   headersSize: number;
-  queryString: NVPairs;
+  queryString: INVPair[];
   cookies: setCookies.Cookie[];
   bodySize: number;
   postData?: {
@@ -42,7 +43,7 @@ export default class Request {
     this.httpVersion = 'HTTP/1.1';
     this.url = request.absoluteUrl;
     this.method = request.method;
-    this.headers = toNVPairs(request.headers);
+    this.headers = toNVPairs(request.headers as {});
     this.headersSize = headersSize(this);
     this.queryString = toNVPairs(request.query);
     this.cookies = setCookies.parse(request.getHeader('Set-Cookie'));

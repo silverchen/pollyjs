@@ -1,10 +1,11 @@
 import getByteLength from 'utf8-byte-length';
 import setCookies from 'set-cookie-parser';
+import PollyResponse from '@pollyjs/core/-private/response';
 
-import toNVPairs from './utils/to-nv-pairs';
+import toNVPairs, { INVPair } from './utils/to-nv-pairs';
 import getFirstHeader from './utils/get-first-header';
 
-function headersSize(response: PollyResponse) {
+function headersSize(response: Response) {
   const keys: string[] = [];
   const values: string[] = [];
 
@@ -25,22 +26,22 @@ export default class Response {
   httpVersion: string;
   status: number;
   statusText: string;
-  headers: NVPairs;
+  headers: INVPair[];
   headersSize: number;
   redirectURL: string;
   cookies: setCookies.Cookie[];
   bodySize: number;
   content: {
-    mimeType: string
-    size: number
-    text?: string
-  }
+    mimeType: string;
+    size: number;
+    text?: string;
+  };
 
   constructor(response: PollyResponse) {
     this.httpVersion = 'HTTP/1.1';
     this.status = response.statusCode;
     this.statusText = response.statusText;
-    this.headers = toNVPairs(response.headers);
+    this.headers = toNVPairs(response.headers as {});
     this.headersSize = headersSize(this);
     this.cookies = setCookies.parse(response.getHeader('Set-Cookie'));
     this.redirectURL = getFirstHeader(response, 'Location') || '';
