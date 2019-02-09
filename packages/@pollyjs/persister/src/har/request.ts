@@ -25,7 +25,7 @@ function headersSize(request: Request) {
 }
 
 export default class Request {
-  httpVersion: string;
+  httpVersion: string = 'HTTP/1.1';
   url: string;
   method: string;
   headers: INVPair[];
@@ -40,7 +40,6 @@ export default class Request {
   };
 
   constructor(request: PollyRequest) {
-    this.httpVersion = 'HTTP/1.1';
     this.url = request.absoluteUrl;
     this.method = request.method;
     this.headers = toNVPairs(request.headers as {});

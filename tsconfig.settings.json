@@ -6,7 +6,8 @@
     "rootDir": ".",
     "baseUrl": "./packages/@pollyjs",
     "paths": {
-      "@pollyjs/core*": ["./core/src*"]
+      "@pollyjs/core*": ["./core/src*"],
+      "@pollyjs/utils*": ["./utils/src*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"],
 

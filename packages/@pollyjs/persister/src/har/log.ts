@@ -9,26 +9,22 @@ interface Browser {
 
 const browser =
   bowser && bowser.name && bowser.version
-    ? { name: bowser.name, version: bowser.version } as Browser
+    ? ({ name: bowser.name, version: bowser.version } as Browser)
     : null;
 
 export default class Log {
-  version: string;
-  entries: Entry[];
-  pages: [];
-  browser?: Browser
+  version: string = '1.2';
+  entries: Entry[] = [];
+  pages: [] = [];
+  browser?: Browser;
   creator?: {
-    name: string
-    version: string
-    comment: string
-  }
+    name: string;
+    version: string;
+    comment: string;
+  };
   _recordingName?: string;
 
   constructor(opts = {}) {
-    this.version = '1.2';
-    this.entries = [];
-    this.pages = [];
-
     // eslint-disable-next-line no-restricted-properties
     Object.assign(this, opts);
 
@@ -49,7 +45,9 @@ export default class Log {
 
   sortEntries() {
     this.entries = this.entries.sort(
-      (a, b) => new Date(a.startedDateTime).getTime() - new Date(b.startedDateTime).getTime()
+      (a, b) =>
+        new Date(a.startedDateTime).getTime() -
+        new Date(b.startedDateTime).getTime()
     );
   }
 }

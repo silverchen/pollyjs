@@ -1,3 +1,6 @@
+import PollyRequest from '@pollyjs/core/-private/request';
+import PollyResponse from '@pollyjs/core/-private/response';
+
 const { isArray } = Array;
 
 /**

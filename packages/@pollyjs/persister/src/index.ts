@@ -11,13 +11,11 @@ const CREATOR_NAME = 'Polly.JS';
 
 export default class Persister {
   polly: Polly;
-  pending: Map<string, { name: string; requests: PollyRequest[] }>;
-  private _cache: Map<string, Promise<HAR | null>>;
+  pending: Map<string, { name: string; requests: PollyRequest[] }> = new Map();
+  private _cache: Map<string, Promise<HAR | null>> = new Map();
 
   constructor(polly: Polly) {
     this.polly = polly;
-    this.pending = new Map();
-    this._cache = new Map();
   }
 
   static get type() {

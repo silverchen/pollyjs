@@ -23,7 +23,7 @@ function headersSize(response: Response) {
 }
 
 export default class Response {
-  httpVersion: string;
+  httpVersion: string = 'HTTP/1.1';
   status: number;
   statusText: string;
   headers: INVPair[];
@@ -38,7 +38,6 @@ export default class Response {
   };
 
   constructor(response: PollyResponse) {
-    this.httpVersion = 'HTTP/1.1';
     this.status = response.statusCode;
     this.statusText = response.statusText;
     this.headers = toNVPairs(response.headers as {});

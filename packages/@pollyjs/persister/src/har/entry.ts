@@ -26,14 +26,14 @@ function totalTime(timings = {} as Timings) {
 }
 
 export default class Entry {
-  public _id: string;
-  public _order: number;
-  public startedDateTime: string;
-  public request: Request;
-  public response: Response;
-  public cache: {};
-  public timings: Timings;
-  public time: number;
+  _id: string;
+  _order: number;
+  startedDateTime: string;
+  request: Request;
+  response: Response;
+  cache: {} = {};
+  timings: Timings;
+  time: number;
 
   constructor(request: PollyRequest) {
     this._id = request.id as string;
@@ -41,7 +41,6 @@ export default class Entry {
     this.startedDateTime = request.timestamp as string;
     this.request = new Request(request);
     this.response = new Response(request.response as PollyResponse);
-    this.cache = {};
     this.timings = {
       blocked: -1,
       dns: -1,
