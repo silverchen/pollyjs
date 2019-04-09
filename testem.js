@@ -11,6 +11,8 @@ if (/^win/.test(process.platform)) {
   ci_launchers.push('Chrome');
 }
 
+window.foo();
+
 module.exports = {
   port: 4000,
   fail_on_zero_tests: true,
