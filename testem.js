@@ -1,6 +1,16 @@
 /* eslint-env node */
 const attachMiddleware = require('./tests/middleware');
 
+const ci_launchers = ['Node', 'Jest', 'Ember', 'ESLint'];
+
+if (/^win/.test(process.platform)) {
+  console.log('launching with IE');
+  ci_launchers.push('IE');
+} else {
+  console.log('launching with Chrome');
+  ci_launchers.push('Chrome');
+}
+
 module.exports = {
   port: 4000,
   fail_on_zero_tests: true,
@@ -8,7 +18,7 @@ module.exports = {
   on_start: 'yarn test:clean',
   before_tests: 'npm-run-all --parallel build test:build',
   on_exit: 'yarn test:clean',
-  launch_in_ci: ['Chrome', 'Node', 'Jest', 'Ember', 'ESLint'],
+  launch_in_ci: ci_launchers,
   launch_in_dev: ['Chrome', 'Node', 'Jest', 'Ember', 'ESLint'],
   watch_files: [
     './scripts/rollup/**/*',
