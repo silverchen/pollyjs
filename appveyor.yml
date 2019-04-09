@@ -14,16 +14,13 @@ branches:
   only:
     - master
 
-# Install scripts. (runs after repo cloning)
 install:
   - ps: Install-Product node $env:nodejs_version
   - appveyor-retry yarn
 
 cache:
-  - '%LOCALAPPDATA%\Yarn'
-  - '%APPDATA%\Roaming\bower'
+  - "%LOCALAPPDATA%\\Yarn"
 
-# Post-install test scripts.
 test_script:
   - cmd: yarn test:ci
 

@@ -4,14 +4,10 @@ const attachMiddleware = require('./tests/middleware');
 const ci_launchers = ['Node', 'Jest', 'Ember', 'ESLint'];
 
 if (/^win/.test(process.platform)) {
-  console.log('launching with IE');
   ci_launchers.push('IE');
 } else {
-  console.log('launching with Chrome');
   ci_launchers.push('Chrome');
 }
-
-window.foo();
 
 module.exports = {
   port: 4000,
